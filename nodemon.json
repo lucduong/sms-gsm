@@ -1,0 +1,13 @@
+{
+  "ignore": [
+    "node_modules",
+    ".git",
+    "src/**/*.*"
+  ],
+
+  "verbose": false,
+
+  "watch": ["src", "webpack.config.js"],
+
+  "ext": "js json ts"
+}
