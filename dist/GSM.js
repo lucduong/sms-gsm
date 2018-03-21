@@ -52,14 +52,28 @@ var GSM = (function (_super) {
     function GSM(ports) {
         var _this = _super.call(this) || this;
         _this.queue = [];
-        _this.isLocked = false;
         _this.partials = new Map();
         _this.ports = new Map();
         ports.forEach(function (p) {
-            _this.ports.set(p.name, new SerialPort("" + p.port, { autoOpen: false }));
+            _this.ports.set(p.name, _this.createNewSerialPort(p.port));
         });
         return _this;
     }
+    GSM.prototype.createNewSerialPort = function (port) {
+        return new SerialPort("" + port, {
+            baudRate: 115200,
+            dataBits: 8,
+            parity: 'none',
+            stopBits: 1,
+            rtscts: true,
+            autoOpen: false,
+        });
+    };
+    GSM.prototype.open = function () {
+        var portNames = this.ports.keys();
+        for (var portNm in portNames) {
+        }
+    };
     GSM.prototype.execute = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
