@@ -1,0 +1,12 @@
+ports:
+  - 
+    name: port1_name
+    port: /dev/ttyUSB0
+    phone: 01234567899
+    enable: true # default is enable
+  - 
+    name: port2_name
+    port: /dev/ttyUSB1
+    phone: 01234567898
+    enable: false
+
