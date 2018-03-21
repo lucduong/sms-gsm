@@ -81,12 +81,12 @@ export class Port extends EventEmitter {
         this.serialPort.write(this.AT_CHECK);
       }
       case Command.SEND_SMS: {
-        const buffer = Buffer.from(`${message.message}`);
+        const buffer = Buffer.from(message.smsContent);
         this._message = message;
         this.serialPort.write(this.AT_CHANGE_MOD_SMS);
         this.serialPort.write('\r');
         this.serialPort.write(this.AT_SEND_SMS);
-        this.serialPort.write(`${message.phone}`);
+        this.serialPort.write(message.phoneNumber);
         this.serialPort.write('"')
         this.serialPort.write('\r');
         this.serialPort.write(buffer);

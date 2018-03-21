@@ -78,7 +78,7 @@ var Port = (function (_super) {
                 this.serialPort.write(this.AT_CHECK);
             }
             case Command.SEND_SMS: {
-                var buffer = Buffer.from(message.message);
+                var buffer = Buffer.from(message.smsContent);
                 this._message = message;
                 this.serialPort.write(this.AT_CHANGE_MOD_SMS);
                 this.serialPort.write('\r');

@@ -1,8 +1,16 @@
 export class Message {
-  message: String;
-  phone: String;
-  constructor(message: String, phone: String) {
-    this.message = message;
-    this.phone = phone;
+  private _smsContent: string;
+  private _phoneNumber: string;
+  constructor(message: string, phone: string) {
+    this._smsContent = message;
+    this._phoneNumber = phone;
+  }
+
+  get smsContent():string{
+    return this._smsContent;
+  }
+
+  get phoneNumber():string{
+    return this._phoneNumber;
   }
 }

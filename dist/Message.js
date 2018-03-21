@@ -1,16 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Message = (function () {
-    function Message(message, phoneNumber) {
-        this._message = message;
-        this._phoneNumber = phoneNumber;
+    function Message(message, phone) {
+        this._smsContent = message;
+        this._phoneNumber = phone;
     }
-    Object.defineProperty(Message.prototype, "message", {
+    Object.defineProperty(Message.prototype, "smsContent", {
         get: function () {
-            return this._message;
-        },
-        set: function (val) {
-            this._message = val;
+            return this._smsContent;
         },
         enumerable: true,
         configurable: true
@@ -18,9 +15,6 @@ var Message = (function () {
     Object.defineProperty(Message.prototype, "phoneNumber", {
         get: function () {
             return this._phoneNumber;
-        },
-        set: function (val) {
-            this._message = val;
         },
         enumerable: true,
         configurable: true
