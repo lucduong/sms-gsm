@@ -22,13 +22,15 @@ export class Port extends EventEmitter {
   private _commandExec: Command;
   private _message: Message;
   private _statusSendSMS: number;
+  private _functionCallBack:string;
 
-  constructor(name: String, port: String) {
+  constructor(name: String, port: String,functionCallBack:string) {
     super();
     this._name = name;
     this._port = port;
     this.serialPort = this.createNewSerialPort(this._port);
     this._statusSendSMS = 0;
+    this._functionCallBack=functionCallBack;
     this.bindEvents();
   }
 
@@ -49,7 +51,7 @@ export class Port extends EventEmitter {
       if (this._commandExec === Command.CHECK) {
         if (data.match("OK")) {
           this._locked = false;
-          console.log("Check GSM is sucessful")
+          this.emit(this._functionCallBack,{status:true})
         }
       } else if (this._commandExec === Command.SEND_SMS) {
         if (data.match("+CMGS") && this._statusSendSMS === 0) {
@@ -58,11 +60,11 @@ export class Port extends EventEmitter {
           if (data.match("OK")) {
             this._statusSendSMS = 0;
             this._locked = false;
-            console.log("Send SMS Sucessful")
+            this.emit(this._functionCallBack,{status:true})
           }
         }
       } else if (this._commandExec === Command.READ_SMS) {
-        console.log(data);
+        this.emit(this._functionCallBack,data)
       }
 
       // header

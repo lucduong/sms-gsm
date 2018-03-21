@@ -20,7 +20,7 @@ var Command;
 })(Command = exports.Command || (exports.Command = {}));
 var Port = (function (_super) {
     __extends(Port, _super);
-    function Port(name, port) {
+    function Port(name, port, functionCallBack) {
         var _this = _super.call(this) || this;
         _this.AT_CHECK = "AT";
         _this.AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
@@ -30,6 +30,7 @@ var Port = (function (_super) {
         _this._port = port;
         _this.serialPort = _this.createNewSerialPort(_this._port);
         _this._statusSendSMS = 0;
+        _this._functionCallBack = functionCallBack;
         _this.bindEvents();
         return _this;
     }
@@ -49,7 +50,7 @@ var Port = (function (_super) {
             if (_this._commandExec === Command.CHECK) {
                 if (data.match("OK")) {
                     _this._locked = false;
-                    console.log("Check GSM is sucessful");
+                    _this.emit(_this._functionCallBack, { status: true });
                 }
             }
             else if (_this._commandExec === Command.SEND_SMS) {
@@ -60,12 +61,12 @@ var Port = (function (_super) {
                     if (data.match("OK")) {
                         _this._statusSendSMS = 0;
                         _this._locked = false;
-                        console.log("Send SMS Sucessful");
+                        _this.emit(_this._functionCallBack, { status: true });
                     }
                 }
             }
             else if (_this._commandExec === Command.READ_SMS) {
-                console.log(data);
+                _this.emit(_this._functionCallBack, data);
             }
         });
     };
