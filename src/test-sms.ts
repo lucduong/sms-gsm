@@ -19,3 +19,5 @@ async function CallTest(){
     await sleep(2000);
     port1.excCommand(Command.READ_SMS,new Message("",""));
 }
+
+CallTest();

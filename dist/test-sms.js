@@ -64,4 +64,5 @@ function CallTest() {
         });
     });
 }
+CallTest();
 //# sourceMappingURL=test-sms.js.map
