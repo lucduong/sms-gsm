@@ -8,16 +8,9 @@ port1.on("listenRunCommand",(data)=>{
     console.log(data);
 });
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function CallTest(){
+port1.open().then(()=>{
     port1.excCommand(Command.CHECK,new Message("",""));
-    await sleep(1000);
-    port1.excCommand(Command.SEND_SMS,new Message("Test goi tin nhan1111","0938256706"));
-    await sleep(2000);
-    port1.excCommand(Command.READ_SMS,new Message("",""));
-}
+})
 
-CallTest();
+
+

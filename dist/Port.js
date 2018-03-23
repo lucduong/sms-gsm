@@ -47,6 +47,7 @@ var Port = (function (_super) {
     Port.prototype.bindEvents = function () {
         var _this = this;
         this.serialPort.on('data', function (data) {
+            console.log(data);
             if (_this._commandExec === Command.CHECK) {
                 if (data.match("OK")) {
                     _this._locked = false;

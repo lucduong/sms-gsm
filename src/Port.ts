@@ -48,6 +48,7 @@ export class Port extends EventEmitter {
   bindEvents(): void {
     this.serialPort.on('data', data => {
       // Dau tien. command.
+      console.log(data);
       if (this._commandExec === Command.CHECK) {
         if (data.match("OK")) {
           this._locked = false;
