@@ -48,17 +48,18 @@ export class Port extends EventEmitter {
   bindEvents(): void {
     this.serialPort.on('data', data => {
       // Dau tien. command.
-      console.log(data);
+      //console.log(data);
+      let strData=data.toString();
       if (this._commandExec === Command.CHECK) {
-        if (data.indexOf("OK")!==-1) {
+        if (strData.indexOf("OK")!==-1) {
           this._locked = false;
           this.emit(this._functionCallBack,{status:true})
         }
       } else if (this._commandExec === Command.SEND_SMS) {
-        if (data.indexOf("+CMGS") !==-1 && this._statusSendSMS === 0) {
+        if (strData.indexOf("+CMGS") !==-1 && this._statusSendSMS === 0) {
           this._statusSendSMS = 1;
         } else if (this._statusSendSMS === 1) {
-          if (data.indexOf("OK")!==-1) {
+          if (strData.indexOf("OK")!==-1) {
             this._statusSendSMS = 0;
             this._locked = false;
             this.emit(this._functionCallBack,{status:true})

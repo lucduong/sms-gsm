@@ -47,19 +47,19 @@ var Port = (function (_super) {
     Port.prototype.bindEvents = function () {
         var _this = this;
         this.serialPort.on('data', function (data) {
-            console.log(data);
+            var strData = data.toString();
             if (_this._commandExec === Command.CHECK) {
-                if (data.indexOf("OK") !== -1) {
+                if (strData.indexOf("OK") !== -1) {
                     _this._locked = false;
                     _this.emit(_this._functionCallBack, { status: true });
                 }
             }
             else if (_this._commandExec === Command.SEND_SMS) {
-                if (data.indexOf("+CMGS") !== -1 && _this._statusSendSMS === 0) {
+                if (strData.indexOf("+CMGS") !== -1 && _this._statusSendSMS === 0) {
                     _this._statusSendSMS = 1;
                 }
                 else if (_this._statusSendSMS === 1) {
-                    if (data.indexOf("OK") !== -1) {
+                    if (strData.indexOf("OK") !== -1) {
                         _this._statusSendSMS = 0;
                         _this._locked = false;
                         _this.emit(_this._functionCallBack, { status: true });
