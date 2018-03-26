@@ -1,17 +1,32 @@
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 var SerialPort = require("serialport");
+var events_1 = require("events");
 var Readline = SerialPort.parsers.Readline;
-var TestPort = (function () {
-    function TestPort() {
-        this.AT_CHECK = "AT+CGMI";
-        this.AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
-        this.AT_CHANGE_MOD_SMS = "AT+CUSD=1";
-        this.AT_SEND_SMS = "AT+CMGS=\"";
-        this._isOpen = false;
-        this._serialPort = this.createNewSerialPort("/dev/ttyUSB15");
-        this._parser = this._serialPort.pipe(new Readline({ delimiter: '\r\n' }));
-        this.bindEnven();
+var TestPort = (function (_super) {
+    __extends(TestPort, _super);
+    function TestPort(functionCallBack) {
+        var _this = _super.call(this) || this;
+        _this.AT_CHECK = "AT+CGMI";
+        _this.AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
+        _this.AT_CHANGE_MOD_SMS = "AT+CUSD=1";
+        _this.AT_SEND_SMS = "AT+CMGS=\"";
+        _this._isOpen = false;
+        _this._functionCallBack = functionCallBack;
+        _this._serialPort = _this.createNewSerialPort("/dev/ttyUSB15");
+        _this._parser = _this._serialPort.pipe(new Readline({ delimiter: '\r\n' }));
+        _this.bindEnven();
+        return _this;
     }
     TestPort.prototype.createNewSerialPort = function (port) {
         return new SerialPort("" + port, {
@@ -24,11 +39,12 @@ var TestPort = (function () {
         });
     };
     TestPort.prototype.bindEnven = function () {
+        var _this = this;
         this._serialPort.on('open', function () {
             console.log("Open port sucessful");
         });
         this._parser.on('data', function (data) {
-            console.log(data);
+            _this.emit(_this._functionCallBack, { Data: data });
         });
     };
     TestPort.prototype.open = function () {
@@ -62,6 +78,6 @@ var TestPort = (function () {
         this._serialPort.write('^z');
     };
     return TestPort;
-}());
+}(events_1.EventEmitter));
 exports.TestPort = TestPort;
 //# sourceMappingURL=TestPort.js.map

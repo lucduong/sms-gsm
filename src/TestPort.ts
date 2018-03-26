@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 import { Message } from './Message';
 const Readline = SerialPort.parsers.Readline;
 
-export class TestPort{
+export class TestPort extends EventEmitter{
     private _serialPort: SerialPort;
     private _isOpen: Boolean;
     private _parser:EventEmitter;
@@ -11,9 +11,11 @@ export class TestPort{
     private AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
     private AT_CHANGE_MOD_SMS = "AT+CUSD=1";
     private AT_SEND_SMS = "AT+CMGS=\"";
-    constructor(){
-        //super();
+    private _functionCallBack:string;
+    constructor(functionCallBack:string){
+        super();
         this._isOpen=false;
+        this._functionCallBack=functionCallBack;
         this._serialPort = this.createNewSerialPort("/dev/ttyUSB15");
         this._parser=this._serialPort.pipe(new Readline({ delimiter: '\r\n' }));
         this.bindEnven();
@@ -34,7 +36,8 @@ export class TestPort{
             console.log("Open port sucessful");
         });
         this._parser.on('data',data => {
-            console.log(data);
+            //console.log(data);
+            this.emit(this._functionCallBack,{Data:data})
         });
     }
     
@@ -67,7 +70,7 @@ export class TestPort{
         this._serialPort.write(new Buffer([0x1A]));
         this._serialPort.write('^z');
     }
-    
+
 }
 
 
