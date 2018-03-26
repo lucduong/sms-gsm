@@ -4,7 +4,7 @@ var SerialPort = require("serialport");
 var Readline = SerialPort.parsers.Readline;
 var TestPort = (function () {
     function TestPort() {
-        this.AT_CHECK = "AT";
+        this.AT_CHECK = "AT+CGMI";
         this._isOpen = false;
         this._serialPort = this.createNewSerialPort("/dev/ttyUSB15");
         this._parser = this._serialPort.pipe(new Readline({ delimiter: '\r\n' }));
@@ -25,9 +25,7 @@ var TestPort = (function () {
             console.log("Open port sucessful");
         });
         this._parser.on('data', function (data) {
-            console.log('-----------');
             console.log(data);
-            console.log('-----------');
         });
     };
     TestPort.prototype.open = function () {

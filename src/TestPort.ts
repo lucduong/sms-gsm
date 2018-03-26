@@ -6,7 +6,7 @@ export class TestPort{
     private _serialPort: SerialPort;
     private _isOpen: Boolean;
     private _parser:EventEmitter;
-    private AT_CHECK = "AT";
+    private AT_CHECK = "AT+CGMI";
     constructor(){
         //super();
         this._isOpen=false;
@@ -30,9 +30,7 @@ export class TestPort{
             console.log("Open port sucessful");
         });
         this._parser.on('data',data => {
-            console.log('-----------');
             console.log(data);
-            console.log('-----------');
         });
     }
     
