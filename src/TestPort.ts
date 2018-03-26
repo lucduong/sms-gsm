@@ -1,5 +1,6 @@
 import * as SerialPort from 'serialport';
 import { EventEmitter } from 'events';
+import { Message } from './Message';
 const Readline = SerialPort.parsers.Readline;
 
 export class TestPort{
@@ -7,6 +8,9 @@ export class TestPort{
     private _isOpen: Boolean;
     private _parser:EventEmitter;
     private AT_CHECK = "AT+CGMI";
+    private AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
+    private AT_CHANGE_MOD_SMS = "AT+CUSD=1";
+    private AT_SEND_SMS = "AT+CMGS=\"";
     constructor(){
         //super();
         this._isOpen=false;
@@ -51,6 +55,19 @@ export class TestPort{
         this._serialPort.write('\r');
     }
 
+    sendSms(message: Message):void{
+        const buffer = Buffer.from(message.smsContent);
+        this._serialPort.write(this.AT_CHANGE_MOD_SMS);
+        this._serialPort.write('\r');
+        this._serialPort.write(this.AT_SEND_SMS);
+        this._serialPort.write(message.phoneNumber);
+        this._serialPort.write('"')
+        this._serialPort.write('\r');
+        this._serialPort.write(buffer);
+        this._serialPort.write(new Buffer([0x1A]));
+        this._serialPort.write('^z');
+    }
+    
 }
 
 
