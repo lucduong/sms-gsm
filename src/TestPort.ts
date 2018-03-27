@@ -19,16 +19,18 @@ export class TestPort extends EventEmitter{
     private AT_READ_UNREAD=`AT+CMGR="REC UNREAD"`;
     private _functionCallBackSendSms:string;
     private _functionCallBackCheckGSM:string;
+    private _functionCallBackReadSMS:string;
     private _commandExec: Command;
     private _statusSendSMS: number;
     private _locked: Boolean;
     private _port: String;
-    constructor(port: String,functionCallBackSendSms:string,functionCallBackCheckGsm:string){
+    constructor(port: String,functionCallBackSendSms:string,functionCallBackCheckGsm:string,functionCallBackreadSms:string){
         super();
         this._isOpen=false;
         this._port=port;
         this._functionCallBackSendSms=functionCallBackSendSms;
         this._functionCallBackCheckGSM=functionCallBackCheckGsm;
+        this._functionCallBackReadSMS=functionCallBackreadSms;
         this._serialPort = this.createNewSerialPort(this._port);
         this._parser=this._serialPort.pipe(new Readline({ delimiter: '\r\n' }));
         this.bindEnven();
@@ -62,8 +64,11 @@ export class TestPort extends EventEmitter{
                     }
                 }
             }else if(this._commandExec===Command.CHECK){
-                console.log(data);
                 this.emit(this._functionCallBackCheckGSM,{Data:data})
+            }
+            else if(this._commandExec===Command.READ_SMS){
+                console.log(data);
+                this.emit(this._functionCallBackReadSMS,{Data:data})
             }
         });
     }

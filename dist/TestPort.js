@@ -21,7 +21,7 @@ var Command;
 var Readline = SerialPort.parsers.Readline;
 var TestPort = (function (_super) {
     __extends(TestPort, _super);
-    function TestPort(port, functionCallBackSendSms, functionCallBackCheckGsm) {
+    function TestPort(port, functionCallBackSendSms, functionCallBackCheckGsm, functionCallBackreadSms) {
         var _this = _super.call(this) || this;
         _this.AT_CHECK = "AT+CGMI";
         _this.AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
@@ -32,6 +32,7 @@ var TestPort = (function (_super) {
         _this._port = port;
         _this._functionCallBackSendSms = functionCallBackSendSms;
         _this._functionCallBackCheckGSM = functionCallBackCheckGsm;
+        _this._functionCallBackReadSMS = functionCallBackreadSms;
         _this._serialPort = _this.createNewSerialPort(_this._port);
         _this._parser = _this._serialPort.pipe(new Readline({ delimiter: '\r\n' }));
         _this.bindEnven();
@@ -69,8 +70,11 @@ var TestPort = (function (_super) {
                 }
             }
             else if (_this._commandExec === Command.CHECK) {
-                console.log(data);
                 _this.emit(_this._functionCallBackCheckGSM, { Data: data });
+            }
+            else if (_this._commandExec === Command.READ_SMS) {
+                console.log(data);
+                _this.emit(_this._functionCallBackReadSMS, { Data: data });
             }
         });
     };
