@@ -59,7 +59,7 @@ export class TestPort extends EventEmitter{
                 let array = data.split(',');
                 let indexSMS=array[1];
                 if(indexSMS){
-                    console.log(`Index SMS: ${indexSMS}`)
+                    console.log(`Co tin nhăn moi Index SMS: ${indexSMS}`)
                     this.readSMSByIndex(indexSMS);
                 }
             }
@@ -80,16 +80,6 @@ export class TestPort extends EventEmitter{
                 this.emit(this._functionCallBackCheckGSM,{Data:data})
             }else if(this._commandExec===Command.READ_SMS){
                 console.log("Read SMS:"+data);
-                //this.emit(this._functionCallBackReadSMS,{Data:data})
-                // if(data.indexOf("+CMTI:")!==-1){ //Co tin nhan moi
-                //     let array = data.split(',');
-                //     let indexSMS=array[1];
-                //     if(indexSMS){
-                //         this.readSMSByIndex(indexSMS);
-                //     }
-                // }else if(data.indexOf("+CMGL:")!==-1){
-
-                // }
             }else if(this._commandExec===Command.READ_SMS_INDEX){
                 if(data.indexOf("+CMGL:")!==-1){
                     let arrayData=data.split(',');
@@ -98,14 +88,21 @@ export class TestPort extends EventEmitter{
                     let numberMobile=arrayData[2];//Số điện thoại
                     let dateReceive=arrayData[4];//Ngày nhận
                     let timeReceive=arrayData[5];//Ngày nhận
+                    console.log("=============Header========================")
+                    console.log(`So dien thoai: ${numberMobile}`)
+                    console.log("=============End Header========================")
                     this._readingSMS=true;
                 }
                 if(this._readingSMS){
-                    this.emit(this._functionCallBackReadSMS,{Data:data})
+                    //this.emit(this._functionCallBackReadSMS,{Data:data})
+                    console.log("=============Start body========================")
+                    console.log("Noi dung tin nhan: "+data);
+                    console.log("=============End Body========================")
                 }
                 if(data.indexOf("OK")!==-1 && data.length===2){
                     this._readingSMS=false;
                     this._commandExec=Command.READ_SMS;
+                    console.log("=============Finish========================")
                 }
                 
             }

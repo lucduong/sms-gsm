@@ -61,7 +61,7 @@ var TestPort = (function (_super) {
                 var array = data.split(',');
                 var indexSMS = array[1];
                 if (indexSMS) {
-                    console.log("Index SMS: " + indexSMS);
+                    console.log("Co tin nh\u0103n moi Index SMS: " + indexSMS);
                     _this.readSMSByIndex(indexSMS);
                 }
             }
@@ -94,14 +94,20 @@ var TestPort = (function (_super) {
                     var numberMobile = arrayData[2];
                     var dateReceive = arrayData[4];
                     var timeReceive = arrayData[5];
+                    console.log("=============Header========================");
+                    console.log("So dien thoai: " + numberMobile);
+                    console.log("=============End Header========================");
                     _this._readingSMS = true;
                 }
                 if (_this._readingSMS) {
-                    _this.emit(_this._functionCallBackReadSMS, { Data: data });
+                    console.log("=============Start body========================");
+                    console.log("Noi dung tin nhan: " + data);
+                    console.log("=============End Body========================");
                 }
                 if (data.indexOf("OK") !== -1 && data.length === 2) {
                     _this._readingSMS = false;
                     _this._commandExec = Command.READ_SMS;
+                    console.log("=============Finish========================");
                 }
             }
             else if (_this._commandExec === Command.DELETE_ALL_SMS) {
