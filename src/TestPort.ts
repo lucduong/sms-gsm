@@ -6,6 +6,7 @@ export enum Command {
     SEND_SMS = 2,
     READ_SMS = 3,
     DELETE_ALL_SMS=4,
+    READ_SMS_INDEX=5,
 }
 const Readline = SerialPort.parsers.Readline;
 
@@ -17,7 +18,7 @@ export class TestPort extends EventEmitter{
     private AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
     private AT_CHANGE_MOD_SMS = "AT+CUSD=1";
     private AT_SEND_SMS = "AT+CMGS=\"";
-    private AT_READ_UNREAD="AT+CMGL=\"ALL\"";
+    private AT_READ_UNREAD="AT+CMGL=\"REC UNREAD\"";
     private AT_DELETE_ALLSMS="AT+CMGD=1,4";
     private _functionCallBackSendSms:string;
     private _functionCallBackCheckGSM:string;
@@ -26,6 +27,7 @@ export class TestPort extends EventEmitter{
     private _statusSendSMS: number;
     private _locked: Boolean;
     private _port: String;
+    private _readingSMS:boolean;
     constructor(port: String,functionCallBackSendSms:string,functionCallBackCheckGsm:string,functionCallBackreadSms:string){
         super();
         this._isOpen=false;
@@ -53,6 +55,15 @@ export class TestPort extends EventEmitter{
             console.log("Open port sucessful");
         });
         this._parser.on('data',data => {
+            if(data.indexOf("+CMTI:")!==-1){ //Có tin nhắn tới
+                let array = data.split(',');
+                let indexSMS=array[1];
+                if(indexSMS){
+                    console.log(`Index SMS: ${indexSMS}`)
+                    this.readSMSByIndex(indexSMS);
+                }
+            }
+
             if(this._commandExec===Command.SEND_SMS){
                 if (data.indexOf("+CMGS:") !==-1 && this._statusSendSMS === 0) {
                     this._statusSendSMS = 1;
@@ -67,9 +78,8 @@ export class TestPort extends EventEmitter{
                 }
             }else if(this._commandExec===Command.CHECK){
                 this.emit(this._functionCallBackCheckGSM,{Data:data})
-            }
-            else if(this._commandExec===Command.READ_SMS){
-                console.log(data);
+            }else if(this._commandExec===Command.READ_SMS){
+                console.log("Read SMS:"+data);
                 //this.emit(this._functionCallBackReadSMS,{Data:data})
                 // if(data.indexOf("+CMTI:")!==-1){ //Co tin nhan moi
                 //     let array = data.split(',');
@@ -80,7 +90,26 @@ export class TestPort extends EventEmitter{
                 // }else if(data.indexOf("+CMGL:")!==-1){
 
                 // }
-            }else if(this._commandExec===Command.DELETE_ALL_SMS){
+            }else if(this._commandExec===Command.READ_SMS_INDEX){
+                if(data.indexOf("+CMGL:")!==-1){
+                    let arrayData=data.split(',');
+                    let command=arrayData[0];//Lệnh thực thi
+                    let statusSMS=arrayData[1];//Tình trạng tin nhắn
+                    let numberMobile=arrayData[2];//Số điện thoại
+                    let dateReceive=arrayData[4];//Ngày nhận
+                    let timeReceive=arrayData[5];//Ngày nhận
+                    this._readingSMS=true;
+                }
+                if(this._readingSMS){
+                    this.emit(this._functionCallBackReadSMS,{Data:data})
+                }
+                if(data.indexOf("OK")!==-1 && data.length===2){
+                    this._readingSMS=false;
+                    this._commandExec=Command.READ_SMS;
+                }
+                
+            }
+            else if(this._commandExec===Command.DELETE_ALL_SMS){
                 console.log(data);
             }
         });
@@ -129,6 +158,8 @@ export class TestPort extends EventEmitter{
     readSMSByIndex(index:number):void{
         this._serialPort.write(`AT+CMGR=${index}`);
         this._serialPort.write('\r');
+        this._commandExec==Command.READ_SMS_INDEX;
+        
     }
 
     deleteAllSMS():void{

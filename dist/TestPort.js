@@ -18,6 +18,7 @@ var Command;
     Command[Command["SEND_SMS"] = 2] = "SEND_SMS";
     Command[Command["READ_SMS"] = 3] = "READ_SMS";
     Command[Command["DELETE_ALL_SMS"] = 4] = "DELETE_ALL_SMS";
+    Command[Command["READ_SMS_INDEX"] = 5] = "READ_SMS_INDEX";
 })(Command = exports.Command || (exports.Command = {}));
 var Readline = SerialPort.parsers.Readline;
 var TestPort = (function (_super) {
@@ -28,7 +29,7 @@ var TestPort = (function (_super) {
         _this.AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
         _this.AT_CHANGE_MOD_SMS = "AT+CUSD=1";
         _this.AT_SEND_SMS = "AT+CMGS=\"";
-        _this.AT_READ_UNREAD = "AT+CMGL=\"ALL\"";
+        _this.AT_READ_UNREAD = "AT+CMGL=\"REC UNREAD\"";
         _this.AT_DELETE_ALLSMS = "AT+CMGD=1,4";
         _this._isOpen = false;
         _this._port = port;
@@ -56,6 +57,14 @@ var TestPort = (function (_super) {
             console.log("Open port sucessful");
         });
         this._parser.on('data', function (data) {
+            if (data.indexOf("+CMTI:") !== -1) {
+                var array = data.split(',');
+                var indexSMS = array[1];
+                if (indexSMS) {
+                    console.log("Index SMS: " + indexSMS);
+                    _this.readSMSByIndex(indexSMS);
+                }
+            }
             if (_this._commandExec === Command.SEND_SMS) {
                 if (data.indexOf("+CMGS:") !== -1 && _this._statusSendSMS === 0) {
                     _this._statusSendSMS = 1;
@@ -75,7 +84,25 @@ var TestPort = (function (_super) {
                 _this.emit(_this._functionCallBackCheckGSM, { Data: data });
             }
             else if (_this._commandExec === Command.READ_SMS) {
-                console.log(data);
+                console.log("Read SMS:" + data);
+            }
+            else if (_this._commandExec === Command.READ_SMS_INDEX) {
+                if (data.indexOf("+CMGL:") !== -1) {
+                    var arrayData = data.split(',');
+                    var command = arrayData[0];
+                    var statusSMS = arrayData[1];
+                    var numberMobile = arrayData[2];
+                    var dateReceive = arrayData[4];
+                    var timeReceive = arrayData[5];
+                    _this._readingSMS = true;
+                }
+                if (_this._readingSMS) {
+                    _this.emit(_this._functionCallBackReadSMS, { Data: data });
+                }
+                if (data.indexOf("OK") !== -1 && data.length === 2) {
+                    _this._readingSMS = false;
+                    _this._commandExec = Command.READ_SMS;
+                }
             }
             else if (_this._commandExec === Command.DELETE_ALL_SMS) {
                 console.log(data);
@@ -124,6 +151,7 @@ var TestPort = (function (_super) {
     TestPort.prototype.readSMSByIndex = function (index) {
         this._serialPort.write("AT+CMGR=" + index);
         this._serialPort.write('\r');
+        this._commandExec == Command.READ_SMS_INDEX;
     };
     TestPort.prototype.deleteAllSMS = function () {
         this._serialPort.write(this.AT_DELETE_ALLSMS);
