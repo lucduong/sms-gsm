@@ -80,6 +80,7 @@ export class TestPort extends EventEmitter{
         });
     }
     checkGsm():void{
+        this._commandExec=Command.CHECK;
         this._serialPort.write(this.AT_CHECK);
         this._serialPort.write('\r');
     }

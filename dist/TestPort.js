@@ -88,6 +88,7 @@ var TestPort = (function (_super) {
         });
     };
     TestPort.prototype.checkGsm = function () {
+        this._commandExec = Command.CHECK;
         this._serialPort.write(this.AT_CHECK);
         this._serialPort.write('\r');
     };
