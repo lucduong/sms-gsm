@@ -19,5 +19,6 @@ testPort.on("listenCallBackReadSms",(data)=>{
 testPort.open().then(()=>{
     //testPort.sendSms(message);
     //testPort.checkGsm();
-    testPort.readMessage();
+    //testPort.readMessage();
+    testPort.deleteAllSMS();
 })
