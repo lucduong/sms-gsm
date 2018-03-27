@@ -8,8 +8,8 @@ testPort.on("listenCallback",(Data)=>{
     console.log(Data)
 })
 
-testPort.on("listenCallBackCheckGsm",(Data)=>{
-    console.log("Check Gsm:"+Data)
+testPort.on("listenCallBackCheckGsm",(data)=>{
+    console.log("Check Gsm:"+data.Data)
 })
 
 testPort.open().then(()=>{

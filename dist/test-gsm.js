@@ -7,8 +7,8 @@ var testPort = new TestPort_1.TestPort("/dev/ttyUSB15", "listenCallback", "liste
 testPort.on("listenCallback", function (Data) {
     console.log(Data);
 });
-testPort.on("listenCallBackCheckGsm", function (Data) {
-    console.log("Check Gsm:" + Data);
+testPort.on("listenCallBackCheckGsm", function (data) {
+    console.log("Check Gsm:" + data.Data);
 });
 testPort.open().then(function () {
     testPort.checkGsm();

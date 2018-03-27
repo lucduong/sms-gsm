@@ -69,6 +69,7 @@ var TestPort = (function (_super) {
                 }
             }
             else if (_this._commandExec === Command.CHECK) {
+                console.log(data);
                 _this.emit(_this._functionCallBackCheckGSM, { Data: data });
             }
         });

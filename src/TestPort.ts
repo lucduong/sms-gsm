@@ -62,6 +62,7 @@ export class TestPort extends EventEmitter{
                     }
                 }
             }else if(this._commandExec===Command.CHECK){
+                console.log(data);
                 this.emit(this._functionCallBackCheckGSM,{Data:data})
             }
         });
