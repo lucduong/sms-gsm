@@ -90,7 +90,6 @@ var TestPort = (function (_super) {
             else if (_this._commandExec === Command.READ_SMS_INDEX) {
                 console.log(data);
                 console.log("==================================================================");
-                _this._commandExec = Command.READ_SMS;
             }
             else if (_this._commandExec === Command.DELETE_ALL_SMS) {
                 console.log(data);

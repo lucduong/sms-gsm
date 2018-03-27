@@ -107,7 +107,7 @@ export class TestPort extends EventEmitter{
                 //     this._commandExec=Command.READ_SMS;
                 //     console.log("=============Finish========================")
                 // }
-                this._commandExec=Command.READ_SMS;
+                //this._commandExec=Command.READ_SMS;
             }
             else if(this._commandExec===Command.DELETE_ALL_SMS){
                 console.log(data);
