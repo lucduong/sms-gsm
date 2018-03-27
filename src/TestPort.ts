@@ -45,8 +45,8 @@ export class TestPort extends EventEmitter{
         });
         this._parser.on('data',data => {
             if(this._commandExec===Command.SEND_SMS){
-                this.emit(this._functionCallBackSendSms,{Data:data})
-                if (data.indexOf("+CMGS") !==-1 && this._statusSendSMS === 0) {
+                //this.emit(this._functionCallBackSendSms,{Data:data})
+                if (data.indexOf("+CMGS:") !==-1 && this._statusSendSMS === 0) {
                     this._statusSendSMS = 1;
                     console.log("Check lenh")
                 } else if (this._statusSendSMS === 1) {

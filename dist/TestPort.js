@@ -51,8 +51,7 @@ var TestPort = (function (_super) {
         });
         this._parser.on('data', function (data) {
             if (_this._commandExec === Command.SEND_SMS) {
-                _this.emit(_this._functionCallBackSendSms, { Data: data });
-                if (data.indexOf("+CMGS") !== -1 && _this._statusSendSMS === 0) {
+                if (data.indexOf("+CMGS:") !== -1 && _this._statusSendSMS === 0) {
                     _this._statusSendSMS = 1;
                     console.log("Check lenh");
                 }
