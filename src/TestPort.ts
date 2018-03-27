@@ -155,7 +155,7 @@ export class TestPort extends EventEmitter{
     }
 
     readSMSByIndex(index:number):void{
-        this._commandExec==Command.READ_SMS_INDEX;
+        this._commandExec=Command.READ_SMS_INDEX;
         this._serialPort.write(`AT+CMGR=${index}`);
         this._serialPort.write('\r');
       
@@ -163,7 +163,7 @@ export class TestPort extends EventEmitter{
     }
 
     deleteAllSMS():void{
-        this._commandExec==Command.DELETE_ALL_SMS;
+        this._commandExec=Command.DELETE_ALL_SMS;
         this._serialPort.write(this.AT_DELETE_ALLSMS);
         this._serialPort.write('\r');
     }
