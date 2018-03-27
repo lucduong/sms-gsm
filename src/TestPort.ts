@@ -55,6 +55,7 @@ export class TestPort extends EventEmitter{
             console.log("Open port sucessful");
         });
         this._parser.on('data',data => {
+            console.log("Status GSM:"+this._commandExec.toString())
             if(data.indexOf("+CMTI:")!==-1){ //Có tin nhắn tới
                 let array = data.split(',');
                 let indexSMS=array[1];
@@ -131,6 +132,9 @@ export class TestPort extends EventEmitter{
     }
 
     sendSms(message: Message):void{
+        this._commandExec=Command.SEND_SMS;
+        this._statusSendSMS=0;
+        this._locked=true;
         const buffer = Buffer.from(message.smsContent);
         this._serialPort.write(this.AT_CHANGE_MOD_SMS);
         this._serialPort.write('\r');
@@ -141,9 +145,7 @@ export class TestPort extends EventEmitter{
         this._serialPort.write(buffer);
         this._serialPort.write(new Buffer([0x1A]));
         this._serialPort.write('^z');
-        this._commandExec=Command.SEND_SMS;
-        this._statusSendSMS=0;
-        this._locked=true;
+       
     }
 
     readMessage():void{
@@ -153,16 +155,17 @@ export class TestPort extends EventEmitter{
     }
 
     readSMSByIndex(index:number):void{
+        this._commandExec==Command.READ_SMS_INDEX;
         this._serialPort.write(`AT+CMGR=${index}`);
         this._serialPort.write('\r');
-        this._commandExec==Command.READ_SMS_INDEX;
+      
         
     }
 
     deleteAllSMS():void{
+        this._commandExec==Command.DELETE_ALL_SMS;
         this._serialPort.write(this.AT_DELETE_ALLSMS);
         this._serialPort.write('\r');
-        this._commandExec==Command.DELETE_ALL_SMS;
     }
 
 }

@@ -57,6 +57,7 @@ var TestPort = (function (_super) {
             console.log("Open port sucessful");
         });
         this._parser.on('data', function (data) {
+            console.log("Status GSM:" + _this._commandExec.toString());
             if (data.indexOf("+CMTI:") !== -1) {
                 var array = data.split(',');
                 var indexSMS = array[1];
@@ -135,6 +136,9 @@ var TestPort = (function (_super) {
         this._serialPort.write('\r');
     };
     TestPort.prototype.sendSms = function (message) {
+        this._commandExec = Command.SEND_SMS;
+        this._statusSendSMS = 0;
+        this._locked = true;
         var buffer = Buffer.from(message.smsContent);
         this._serialPort.write(this.AT_CHANGE_MOD_SMS);
         this._serialPort.write('\r');
@@ -145,9 +149,6 @@ var TestPort = (function (_super) {
         this._serialPort.write(buffer);
         this._serialPort.write(new Buffer([0x1A]));
         this._serialPort.write('^z');
-        this._commandExec = Command.SEND_SMS;
-        this._statusSendSMS = 0;
-        this._locked = true;
     };
     TestPort.prototype.readMessage = function () {
         this._commandExec = Command.READ_SMS;
@@ -155,14 +156,14 @@ var TestPort = (function (_super) {
         this._serialPort.write('\r');
     };
     TestPort.prototype.readSMSByIndex = function (index) {
+        this._commandExec == Command.READ_SMS_INDEX;
         this._serialPort.write("AT+CMGR=" + index);
         this._serialPort.write('\r');
-        this._commandExec == Command.READ_SMS_INDEX;
     };
     TestPort.prototype.deleteAllSMS = function () {
+        this._commandExec == Command.DELETE_ALL_SMS;
         this._serialPort.write(this.AT_DELETE_ALLSMS);
         this._serialPort.write('\r');
-        this._commandExec == Command.DELETE_ALL_SMS;
     };
     return TestPort;
 }(events_1.EventEmitter));
