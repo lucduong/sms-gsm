@@ -16,15 +16,20 @@ export class TestPort extends EventEmitter{
     private AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
     private AT_CHANGE_MOD_SMS = "AT+CUSD=1";
     private AT_SEND_SMS = "AT+CMGS=\"";
+    private AT_READ_UNREAD=`AT+CMGR="REC UNREAD"`;
     private _functionCallBackSendSms:string;
+    private _functionCallBackCheckGSM:string;
     private _commandExec: Command;
     private _statusSendSMS: number;
     private _locked: Boolean;
-    constructor(functionCallBackSendSms:string){
+    private _port: String;
+    constructor(port: String,functionCallBackSendSms:string,functionCallBackCheckGsm:string){
         super();
         this._isOpen=false;
+        this._port=port;
         this._functionCallBackSendSms=functionCallBackSendSms;
-        this._serialPort = this.createNewSerialPort("/dev/ttyUSB15");
+        this._functionCallBackCheckGSM=functionCallBackCheckGsm;
+        this._serialPort = this.createNewSerialPort(this._port);
         this._parser=this._serialPort.pipe(new Readline({ delimiter: '\r\n' }));
         this.bindEnven();
     }
@@ -45,19 +50,19 @@ export class TestPort extends EventEmitter{
         });
         this._parser.on('data',data => {
             if(this._commandExec===Command.SEND_SMS){
-                //this.emit(this._functionCallBackSendSms,{Data:data})
                 if (data.indexOf("+CMGS:") !==-1 && this._statusSendSMS === 0) {
                     this._statusSendSMS = 1;
-                    console.log("Check lenh")
                 } else if (this._statusSendSMS === 1) {
-                    if (data.indexOf("OK")!==-1) {
-                      this._statusSendSMS = 0;
-                      this._locked = false;
-                      this.emit(this._functionCallBackSendSms,{status:true})
-                      console.log("KQ: "+data)
-                      console.log("Length: "+data.length)
+                    this._statusSendSMS = 0;
+                    this._locked = false;
+                    if (data.indexOf("OK")!==-1&&data.length===2) {
+                        this.emit(this._functionCallBackSendSms,{status:true})
+                    }else{
+                        this.emit(this._functionCallBackSendSms,{status:false})
                     }
                 }
+            }else if(this._commandExec===Command.CHECK){
+                this.emit(this._functionCallBackCheckGSM,{Data:data})
             }
         });
     }
@@ -93,6 +98,12 @@ export class TestPort extends EventEmitter{
         this._commandExec=Command.SEND_SMS;
         this._statusSendSMS=0;
         this._locked=true;
+    }
+
+    readMessage():void{
+        this._commandExec=Command.READ_SMS;
+        this._serialPort.write(this.AT_READ_UNREAD);
+        this._serialPort.write('\r');
     }
 
 }

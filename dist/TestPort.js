@@ -21,15 +21,18 @@ var Command;
 var Readline = SerialPort.parsers.Readline;
 var TestPort = (function (_super) {
     __extends(TestPort, _super);
-    function TestPort(functionCallBackSendSms) {
+    function TestPort(port, functionCallBackSendSms, functionCallBackCheckGsm) {
         var _this = _super.call(this) || this;
         _this.AT_CHECK = "AT+CGMI";
         _this.AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
         _this.AT_CHANGE_MOD_SMS = "AT+CUSD=1";
         _this.AT_SEND_SMS = "AT+CMGS=\"";
+        _this.AT_READ_UNREAD = "AT+CMGR=\"REC UNREAD\"";
         _this._isOpen = false;
+        _this._port = port;
         _this._functionCallBackSendSms = functionCallBackSendSms;
-        _this._serialPort = _this.createNewSerialPort("/dev/ttyUSB15");
+        _this._functionCallBackCheckGSM = functionCallBackCheckGsm;
+        _this._serialPort = _this.createNewSerialPort(_this._port);
         _this._parser = _this._serialPort.pipe(new Readline({ delimiter: '\r\n' }));
         _this.bindEnven();
         return _this;
@@ -53,17 +56,20 @@ var TestPort = (function (_super) {
             if (_this._commandExec === Command.SEND_SMS) {
                 if (data.indexOf("+CMGS:") !== -1 && _this._statusSendSMS === 0) {
                     _this._statusSendSMS = 1;
-                    console.log("Check lenh");
                 }
                 else if (_this._statusSendSMS === 1) {
-                    if (data.indexOf("OK") !== -1) {
-                        _this._statusSendSMS = 0;
-                        _this._locked = false;
+                    _this._statusSendSMS = 0;
+                    _this._locked = false;
+                    if (data.indexOf("OK") !== -1 && data.length === 2) {
                         _this.emit(_this._functionCallBackSendSms, { status: true });
-                        console.log("KQ: " + data);
-                        console.log("Length: " + data.length);
+                    }
+                    else {
+                        _this.emit(_this._functionCallBackSendSms, { status: false });
                     }
                 }
+            }
+            else if (_this._commandExec === Command.CHECK) {
+                _this.emit(_this._functionCallBackCheckGSM, { Data: data });
             }
         });
     };
@@ -99,6 +105,11 @@ var TestPort = (function (_super) {
         this._commandExec = Command.SEND_SMS;
         this._statusSendSMS = 0;
         this._locked = true;
+    };
+    TestPort.prototype.readMessage = function () {
+        this._commandExec = Command.READ_SMS;
+        this._serialPort.write(this.AT_READ_UNREAD);
+        this._serialPort.write('\r');
     };
     return TestPort;
 }(events_1.EventEmitter));
