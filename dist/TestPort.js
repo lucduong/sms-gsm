@@ -17,6 +17,7 @@ var Command;
     Command[Command["CHECK"] = 1] = "CHECK";
     Command[Command["SEND_SMS"] = 2] = "SEND_SMS";
     Command[Command["READ_SMS"] = 3] = "READ_SMS";
+    Command[Command["DELETE_ALL_SMS"] = 4] = "DELETE_ALL_SMS";
 })(Command = exports.Command || (exports.Command = {}));
 var Readline = SerialPort.parsers.Readline;
 var TestPort = (function (_super) {
@@ -28,6 +29,7 @@ var TestPort = (function (_super) {
         _this.AT_CHANGE_MOD_SMS = "AT+CUSD=1";
         _this.AT_SEND_SMS = "AT+CMGS=\"";
         _this.AT_READ_UNREAD = "AT+CMGL=\"REC UNREAD\"";
+        _this.AT_DELETE_ALLSMS = "AT+CMGD=1,4";
         _this._isOpen = false;
         _this._port = port;
         _this._functionCallBackSendSms = functionCallBackSendSms;
@@ -73,7 +75,9 @@ var TestPort = (function (_super) {
                 _this.emit(_this._functionCallBackCheckGSM, { Data: data });
             }
             else if (_this._commandExec === Command.READ_SMS) {
-                _this.emit(_this._functionCallBackReadSMS, { Data: data });
+            }
+            else if (_this._commandExec === Command.DELETE_ALL_SMS) {
+                console.log(data);
             }
         });
     };
@@ -115,6 +119,15 @@ var TestPort = (function (_super) {
         this._commandExec = Command.READ_SMS;
         this._serialPort.write(this.AT_READ_UNREAD);
         this._serialPort.write('\r');
+    };
+    TestPort.prototype.readSMSByIndex = function (index) {
+        this._serialPort.write("AT+CMGR=" + index);
+        this._serialPort.write('\r');
+    };
+    TestPort.prototype.deleteAllSMS = function () {
+        this._serialPort.write(this.AT_DELETE_ALLSMS);
+        this._serialPort.write('\r');
+        this._commandExec == Command.DELETE_ALL_SMS;
     };
     return TestPort;
 }(events_1.EventEmitter));

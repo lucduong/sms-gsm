@@ -5,6 +5,7 @@ export enum Command {
     CHECK = 1,
     SEND_SMS = 2,
     READ_SMS = 3,
+    DELETE_ALL_SMS=4,
 }
 const Readline = SerialPort.parsers.Readline;
 
@@ -17,6 +18,7 @@ export class TestPort extends EventEmitter{
     private AT_CHANGE_MOD_SMS = "AT+CUSD=1";
     private AT_SEND_SMS = "AT+CMGS=\"";
     private AT_READ_UNREAD="AT+CMGL=\"REC UNREAD\"";
+    private AT_DELETE_ALLSMS="AT+CMGD=1,4";
     private _functionCallBackSendSms:string;
     private _functionCallBackCheckGSM:string;
     private _functionCallBackReadSMS:string;
@@ -68,7 +70,18 @@ export class TestPort extends EventEmitter{
             }
             else if(this._commandExec===Command.READ_SMS){
                 //console.log(data);
-                this.emit(this._functionCallBackReadSMS,{Data:data})
+                //this.emit(this._functionCallBackReadSMS,{Data:data})
+                // if(data.indexOf("+CMTI:")!==-1){ //Co tin nhan moi
+                //     let array = data.split(',');
+                //     let indexSMS=array[1];
+                //     if(indexSMS){
+                //         this.readSMSByIndex(indexSMS);
+                //     }
+                // }else if(data.indexOf("+CMGL:")!==-1){
+
+                // }
+            }else if(this._commandExec===Command.DELETE_ALL_SMS){
+                console.log(data);
             }
         });
     }
@@ -111,6 +124,17 @@ export class TestPort extends EventEmitter{
         this._commandExec=Command.READ_SMS;
         this._serialPort.write(this.AT_READ_UNREAD);
         this._serialPort.write('\r');
+    }
+
+    readSMSByIndex(index:number):void{
+        this._serialPort.write(`AT+CMGR=${index}`);
+        this._serialPort.write('\r');
+    }
+
+    deleteAllSMS():void{
+        this._serialPort.write(this.AT_DELETE_ALLSMS);
+        this._serialPort.write('\r');
+        this._commandExec==Command.DELETE_ALL_SMS;
     }
 
 }
