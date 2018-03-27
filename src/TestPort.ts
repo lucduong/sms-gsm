@@ -55,7 +55,7 @@ export class TestPort extends EventEmitter{
                       this._locked = false;
                       this.emit(this._functionCallBackSendSms,{status:true})
                       console.log("KQ: "+data)
-                      console.log("Length: "+data.Length)
+                      console.log("Length: "+data.length)
                     }
                 }
             }

@@ -62,7 +62,7 @@ var TestPort = (function (_super) {
                         _this._locked = false;
                         _this.emit(_this._functionCallBackSendSms, { status: true });
                         console.log("KQ: " + data);
-                        console.log("Length: " + data.Length);
+                        console.log("Length: " + data.length);
                     }
                 }
             }
