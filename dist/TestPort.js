@@ -28,7 +28,7 @@ var TestPort = (function (_super) {
         _this.AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
         _this.AT_CHANGE_MOD_SMS = "AT+CUSD=1";
         _this.AT_SEND_SMS = "AT+CMGS=\"";
-        _this.AT_READ_UNREAD = "AT+CMGL=\"REC UNREAD\"";
+        _this.AT_READ_UNREAD = "AT+CMGL=\"ALL\"";
         _this.AT_DELETE_ALLSMS = "AT+CMGD=1,4";
         _this._isOpen = false;
         _this._port = port;
@@ -75,6 +75,7 @@ var TestPort = (function (_super) {
                 _this.emit(_this._functionCallBackCheckGSM, { Data: data });
             }
             else if (_this._commandExec === Command.READ_SMS) {
+                console.log(data);
             }
             else if (_this._commandExec === Command.DELETE_ALL_SMS) {
                 console.log(data);

@@ -17,7 +17,7 @@ export class TestPort extends EventEmitter{
     private AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
     private AT_CHANGE_MOD_SMS = "AT+CUSD=1";
     private AT_SEND_SMS = "AT+CMGS=\"";
-    private AT_READ_UNREAD="AT+CMGL=\"REC UNREAD\"";
+    private AT_READ_UNREAD="AT+CMGL=\"ALL\"";
     private AT_DELETE_ALLSMS="AT+CMGD=1,4";
     private _functionCallBackSendSms:string;
     private _functionCallBackCheckGSM:string;
@@ -69,7 +69,7 @@ export class TestPort extends EventEmitter{
                 this.emit(this._functionCallBackCheckGSM,{Data:data})
             }
             else if(this._commandExec===Command.READ_SMS){
-                //console.log(data);
+                console.log(data);
                 //this.emit(this._functionCallBackReadSMS,{Data:data})
                 // if(data.indexOf("+CMTI:")!==-1){ //Co tin nhan moi
                 //     let array = data.split(',');
