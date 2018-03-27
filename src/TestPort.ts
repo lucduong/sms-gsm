@@ -83,30 +83,31 @@ export class TestPort extends EventEmitter{
                 console.log("Read SMS:"+data);
             }else if(this._commandExec===Command.READ_SMS_INDEX){
                 console.log(data);
-                if(data.indexOf("+CMGR:")!==-1){
-                    let arrayData=data.split(',');
-                    let command=arrayData[0];//Lệnh thực thi
-                    let statusSMS=arrayData[1];//Tình trạng tin nhắn
-                    let numberMobile=arrayData[2];//Số điện thoại
-                    let dateReceive=arrayData[4];//Ngày nhận
-                    let timeReceive=arrayData[5];//Ngày nhận
-                    console.log("=============Header========================")
-                    console.log(`So dien thoai: ${numberMobile}`)
-                    console.log("=============End Header========================")
-                    this._readingSMS=true;
-                }
-                if(this._readingSMS){
-                    //this.emit(this._functionCallBackReadSMS,{Data:data})
-                    console.log("=============Start body========================")
-                    console.log("Noi dung tin nhan: "+data);
-                    console.log("=============End Body========================")
-                }
-                if(data.indexOf("OK")!==-1 && data.length===2){
-                    this._readingSMS=false;
-                    this._commandExec=Command.READ_SMS;
-                    console.log("=============Finish========================")
-                }
-                
+                console.log("==================================================================")
+                // if(data.indexOf("+CMGR:")!==-1){
+                //     let arrayData=data.split(',');
+                //     let command=arrayData[0];//Lệnh thực thi
+                //     let statusSMS=arrayData[1];//Tình trạng tin nhắn
+                //     let numberMobile=arrayData[2];//Số điện thoại
+                //     let dateReceive=arrayData[4];//Ngày nhận
+                //     let timeReceive=arrayData[5];//Ngày nhận
+                //     console.log("=============Header========================")
+                //     console.log(`So dien thoai: ${numberMobile}`)
+                //     console.log("=============End Header========================")
+                //     this._readingSMS=true;
+                // }
+                // if(this._readingSMS){
+                //     //this.emit(this._functionCallBackReadSMS,{Data:data})
+                //     console.log("=============Start body========================")
+                //     console.log("Noi dung tin nhan: "+data);
+                //     console.log("=============End Body========================")
+                // }
+                // if(data.indexOf("OK")!==-1 && data.length===2){
+                //     this._readingSMS=false;
+                //     this._commandExec=Command.READ_SMS;
+                //     console.log("=============Finish========================")
+                // }
+                this._commandExec=Command.READ_SMS;
             }
             else if(this._commandExec===Command.DELETE_ALL_SMS){
                 console.log(data);
