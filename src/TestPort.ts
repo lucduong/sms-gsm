@@ -82,7 +82,8 @@ export class TestPort extends EventEmitter{
             }else if(this._commandExec===Command.READ_SMS){
                 console.log("Read SMS:"+data);
             }else if(this._commandExec===Command.READ_SMS_INDEX){
-                if(data.indexOf("+CMGL:")!==-1){
+                console.log(data);
+                if(data.indexOf("+CMGR:")!==-1){
                     let arrayData=data.split(',');
                     let command=arrayData[0];//Lệnh thực thi
                     let statusSMS=arrayData[1];//Tình trạng tin nhắn
