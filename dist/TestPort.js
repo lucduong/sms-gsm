@@ -88,8 +88,28 @@ var TestPort = (function (_super) {
                 console.log("Read SMS:" + data);
             }
             else if (_this._commandExec === Command.READ_SMS_INDEX) {
-                console.log(data);
-                console.log("==================================================================");
+                if (data.indexOf("+CMGR:") !== -1) {
+                    var arrayData = data.split(',');
+                    var command = arrayData[0];
+                    var statusSMS = arrayData[1];
+                    var numberMobile = arrayData[2];
+                    var dateReceive = arrayData[4];
+                    var timeReceive = arrayData[5];
+                    console.log("=============Header========================");
+                    console.log("So dien thoai: " + numberMobile);
+                    console.log("=============End Header========================");
+                    _this._readingSMS = true;
+                }
+                else if (data.indexOf("OK") !== -1 && data.length === 2) {
+                    _this._readingSMS = false;
+                    _this._commandExec = Command.READ_SMS;
+                    console.log("=============Finish========================");
+                }
+                else if (_this._readingSMS) {
+                    console.log("=============Start body========================");
+                    console.log("Noi dung tin nhan: " + data);
+                    console.log("=============End Body========================");
+                }
             }
             else if (_this._commandExec === Command.DELETE_ALL_SMS) {
                 console.log(data);
