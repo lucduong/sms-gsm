@@ -1,6 +1,11 @@
 import * as SerialPort from 'serialport';
 import { EventEmitter } from 'events';
 import { Message } from './Message';
+export enum Command {
+    CHECK = 1,
+    SEND_SMS = 2,
+    READ_SMS = 3,
+}
 const Readline = SerialPort.parsers.Readline;
 
 export class TestPort extends EventEmitter{
@@ -11,11 +16,14 @@ export class TestPort extends EventEmitter{
     private AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
     private AT_CHANGE_MOD_SMS = "AT+CUSD=1";
     private AT_SEND_SMS = "AT+CMGS=\"";
-    private _functionCallBack:string;
-    constructor(functionCallBack:string){
+    private _functionCallBackSendSms:string;
+    private _commandExec: Command;
+    private _statusSendSMS: number;
+    private _locked: Boolean;
+    constructor(functionCallBackSendSms:string){
         super();
         this._isOpen=false;
-        this._functionCallBack=functionCallBack;
+        this._functionCallBackSendSms=functionCallBackSendSms;
         this._serialPort = this.createNewSerialPort("/dev/ttyUSB15");
         this._parser=this._serialPort.pipe(new Readline({ delimiter: '\r\n' }));
         this.bindEnven();
@@ -36,8 +44,21 @@ export class TestPort extends EventEmitter{
             console.log("Open port sucessful");
         });
         this._parser.on('data',data => {
-            //console.log(data);
-            this.emit(this._functionCallBack,{Data:data})
+            if(this._commandExec===Command.SEND_SMS){
+                this.emit(this._functionCallBackSendSms,{Data:data})
+                if (data.indexOf("+CMGS") !==-1 && this._statusSendSMS === 0) {
+                    this._statusSendSMS = 1;
+                    console.log("Check lenh")
+                } else if (this._statusSendSMS === 1) {
+                    if (data.indexOf("OK")!==-1) {
+                      this._statusSendSMS = 0;
+                      this._locked = false;
+                      this.emit(this._functionCallBackSendSms,{status:true})
+                      console.log("KQ: "+data)
+                      console.log("Length: "+data.Length)
+                    }
+                }
+            }
         });
     }
     
@@ -69,6 +90,9 @@ export class TestPort extends EventEmitter{
         this._serialPort.write(buffer);
         this._serialPort.write(new Buffer([0x1A]));
         this._serialPort.write('^z');
+        this._commandExec=Command.SEND_SMS;
+        this._statusSendSMS=0;
+        this._locked=true;
     }
 
 }

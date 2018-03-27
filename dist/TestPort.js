@@ -12,17 +12,23 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var SerialPort = require("serialport");
 var events_1 = require("events");
+var Command;
+(function (Command) {
+    Command[Command["CHECK"] = 1] = "CHECK";
+    Command[Command["SEND_SMS"] = 2] = "SEND_SMS";
+    Command[Command["READ_SMS"] = 3] = "READ_SMS";
+})(Command = exports.Command || (exports.Command = {}));
 var Readline = SerialPort.parsers.Readline;
 var TestPort = (function (_super) {
     __extends(TestPort, _super);
-    function TestPort(functionCallBack) {
+    function TestPort(functionCallBackSendSms) {
         var _this = _super.call(this) || this;
         _this.AT_CHECK = "AT+CGMI";
         _this.AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
         _this.AT_CHANGE_MOD_SMS = "AT+CUSD=1";
         _this.AT_SEND_SMS = "AT+CMGS=\"";
         _this._isOpen = false;
-        _this._functionCallBack = functionCallBack;
+        _this._functionCallBackSendSms = functionCallBackSendSms;
         _this._serialPort = _this.createNewSerialPort("/dev/ttyUSB15");
         _this._parser = _this._serialPort.pipe(new Readline({ delimiter: '\r\n' }));
         _this.bindEnven();
@@ -44,7 +50,22 @@ var TestPort = (function (_super) {
             console.log("Open port sucessful");
         });
         this._parser.on('data', function (data) {
-            _this.emit(_this._functionCallBack, { Data: data });
+            if (_this._commandExec === Command.SEND_SMS) {
+                _this.emit(_this._functionCallBackSendSms, { Data: data });
+                if (data.indexOf("+CMGS") !== -1 && _this._statusSendSMS === 0) {
+                    _this._statusSendSMS = 1;
+                    console.log("Check lenh");
+                }
+                else if (_this._statusSendSMS === 1) {
+                    if (data.indexOf("OK") !== -1) {
+                        _this._statusSendSMS = 0;
+                        _this._locked = false;
+                        _this.emit(_this._functionCallBackSendSms, { status: true });
+                        console.log("KQ: " + data);
+                        console.log("Length: " + data.Length);
+                    }
+                }
+            }
         });
     };
     TestPort.prototype.open = function () {
@@ -76,6 +97,9 @@ var TestPort = (function (_super) {
         this._serialPort.write(buffer);
         this._serialPort.write(new Buffer([0x1A]));
         this._serialPort.write('^z');
+        this._commandExec = Command.SEND_SMS;
+        this._statusSendSMS = 0;
+        this._locked = true;
     };
     return TestPort;
 }(events_1.EventEmitter));

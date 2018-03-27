@@ -8,6 +8,6 @@ testPort.on("listenCallback", function (Data) {
     console.log(Data);
 });
 testPort.open().then(function () {
-    testPort.checkGsm();
+    testPort.sendSms(message);
 });
 //# sourceMappingURL=test-gsm.js.map

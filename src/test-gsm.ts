@@ -8,6 +8,6 @@ testPort.on("listenCallback",(Data)=>{
     console.log(Data)
 })
 testPort.open().then(()=>{
-    //testPort.sendSms(message);
-    testPort.checkGsm();
+    testPort.sendSms(message);
+    //testPort.checkGsm();
 })
