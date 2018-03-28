@@ -179,8 +179,8 @@ export class TestPort extends EventEmitter{
 
     checkBalance():void{
         this._commandExec=Command.CHECK_BALANCE;
-        this._serialPort.write("AT+CUSD=1");
-        this._serialPort.write('"*101#"');
+        this._serialPort.write("AT+CUSD=1,\"*101#\"");
+        //this._serialPort.write('"*101#"');
         this._serialPort.write('\r');
     }
 

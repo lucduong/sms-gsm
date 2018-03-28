@@ -174,8 +174,7 @@ var TestPort = (function (_super) {
     };
     TestPort.prototype.checkBalance = function () {
         this._commandExec = Command.CHECK_BALANCE;
-        this._serialPort.write("AT+CUSD=1");
-        this._serialPort.write('"*101#"');
+        this._serialPort.write("AT+CUSD=1,\"*101#\"");
         this._serialPort.write('\r');
     };
     return TestPort;
