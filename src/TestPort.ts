@@ -56,6 +56,7 @@ export class TestPort extends EventEmitter{
             console.log("Open port sucessful");
         });
         this._parser.on('data',data => {
+            console.log(data);
             if(data.indexOf("+CMTI:")!==-1){ //Có tin nhắn tới
                 let array = data.split(',');
                 let indexSMS=array[1];
@@ -66,7 +67,7 @@ export class TestPort extends EventEmitter{
             }
 
             if(this._commandExec===Command.SEND_SMS){
-                console.log(data);
+               
                 if (data.indexOf("+CMGS:") !==-1 && this._statusSendSMS === 0) {
                     this._statusSendSMS = 1;
                 } else if (this._statusSendSMS === 1) {
@@ -157,10 +158,10 @@ export class TestPort extends EventEmitter{
         const dataPdu=pdu(message.smsContent, message.phoneNumber, null, 16);
         console.log("Data sau khi convert: "+dataPdu.pdu);
         this._serialPort.write(this.AT_CHANGE_MOD_SMS);
-        this._serialPort.write('\r');
-        this._serialPort.write("AT+CMGS=14");
-        this._serialPort.write('\r');
-        this._serialPort.write("0001030691214365000004C9E9340B");
+        this._serialPort.write('\n');
+        this._serialPort.write(dataPdu.command);
+        this._serialPort.write('\n');
+        this._serialPort.write(dataPdu.pdu);
         this._serialPort.write('^z');
     }
 

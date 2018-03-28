@@ -59,6 +59,7 @@ var TestPort = (function (_super) {
             console.log("Open port sucessful");
         });
         this._parser.on('data', function (data) {
+            console.log(data);
             if (data.indexOf("+CMTI:") !== -1) {
                 var array = data.split(',');
                 var indexSMS = array[1];
@@ -68,7 +69,6 @@ var TestPort = (function (_super) {
                 }
             }
             if (_this._commandExec === Command.SEND_SMS) {
-                console.log(data);
                 if (data.indexOf("+CMGS:") !== -1 && _this._statusSendSMS === 0) {
                     _this._statusSendSMS = 1;
                 }
@@ -152,10 +152,10 @@ var TestPort = (function (_super) {
         var dataPdu = pdu(message.smsContent, message.phoneNumber, null, 16);
         console.log("Data sau khi convert: " + dataPdu.pdu);
         this._serialPort.write(this.AT_CHANGE_MOD_SMS);
-        this._serialPort.write('\r');
-        this._serialPort.write("AT+CMGS=14");
-        this._serialPort.write('\r');
-        this._serialPort.write("0001030691214365000004C9E9340B");
+        this._serialPort.write('\n');
+        this._serialPort.write(dataPdu.command);
+        this._serialPort.write('\n');
+        this._serialPort.write(dataPdu.pdu);
         this._serialPort.write('^z');
     };
     TestPort.prototype.readMessage = function () {
