@@ -68,6 +68,7 @@ var TestPort = (function (_super) {
                 }
             }
             if (_this._commandExec === Command.SEND_SMS) {
+                console.log(data);
                 if (data.indexOf("+CMGS:") !== -1 && _this._statusSendSMS === 0) {
                     _this._statusSendSMS = 1;
                 }

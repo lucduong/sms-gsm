@@ -66,6 +66,7 @@ export class TestPort extends EventEmitter{
             }
 
             if(this._commandExec===Command.SEND_SMS){
+                console.log(data);
                 if (data.indexOf("+CMGS:") !==-1 && this._statusSendSMS === 0) {
                     this._statusSendSMS = 1;
                 } else if (this._statusSendSMS === 1) {
