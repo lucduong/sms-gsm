@@ -15,7 +15,7 @@ export class TestPort extends EventEmitter{
     private _serialPort: SerialPort;
     private _isOpen: Boolean;
     private _parser:EventEmitter;
-    private AT_CHECK = "AT+CGMI";
+    private AT_CHECK = "AT+CPIN?";
     private AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
     private AT_CHANGE_MOD_SMS = "AT+CUSD=1";
     private AT_SEND_SMS = "AT+CMGS=\"";
@@ -78,7 +78,8 @@ export class TestPort extends EventEmitter{
                     }
                 }
             }else if(this._commandExec===Command.CHECK){
-                this.emit(this._functionCallBackCheckGSM,{Data:data})
+                console.log(`Port name: ${this._port}` +data)
+                //this.emit(this._functionCallBackCheckGSM,{Data:data})
             }else if(this._commandExec===Command.CHECK_BALANCE){
                 console.log("Kiem tra TK: "+data);
             }else if(this._commandExec===Command.READ_SMS){

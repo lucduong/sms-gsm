@@ -26,7 +26,7 @@ var TestPort = (function (_super) {
     __extends(TestPort, _super);
     function TestPort(port, functionCallBackSendSms, functionCallBackCheckGsm, functionCallBackreadSms) {
         var _this = _super.call(this) || this;
-        _this.AT_CHECK = "AT+CGMI";
+        _this.AT_CHECK = "AT+CPIN?";
         _this.AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
         _this.AT_CHANGE_MOD_SMS = "AT+CUSD=1";
         _this.AT_SEND_SMS = "AT+CMGS=\"";
@@ -82,7 +82,7 @@ var TestPort = (function (_super) {
                 }
             }
             else if (_this._commandExec === Command.CHECK) {
-                _this.emit(_this._functionCallBackCheckGSM, { Data: data });
+                console.log("Port name: " + _this._port + data);
             }
             else if (_this._commandExec === Command.CHECK_BALANCE) {
                 console.log("Kiem tra TK: " + data);
