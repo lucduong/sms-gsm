@@ -19,6 +19,7 @@ var Command;
     Command[Command["READ_SMS"] = 3] = "READ_SMS";
     Command[Command["DELETE_ALL_SMS"] = 4] = "DELETE_ALL_SMS";
     Command[Command["READ_SMS_INDEX"] = 5] = "READ_SMS_INDEX";
+    Command[Command["CHECK_BALANCE"] = 6] = "CHECK_BALANCE";
 })(Command = exports.Command || (exports.Command = {}));
 var Readline = SerialPort.parsers.Readline;
 var TestPort = (function (_super) {
@@ -57,7 +58,6 @@ var TestPort = (function (_super) {
             console.log("Open port sucessful");
         });
         this._parser.on('data', function (data) {
-            console.log("Status GSM:" + _this._commandExec.toString());
             if (data.indexOf("+CMTI:") !== -1) {
                 var array = data.split(',');
                 var indexSMS = array[1];
@@ -83,6 +83,9 @@ var TestPort = (function (_super) {
             }
             else if (_this._commandExec === Command.CHECK) {
                 _this.emit(_this._functionCallBackCheckGSM, { Data: data });
+            }
+            else if (_this._commandExec === Command.CHECK_BALANCE) {
+                console.log("Kiem tra TK: " + data);
             }
             else if (_this._commandExec === Command.READ_SMS) {
                 if (data.indexOf('+CMGL:') !== -1) {
@@ -167,6 +170,12 @@ var TestPort = (function (_super) {
     TestPort.prototype.deleteAllSMS = function () {
         this._commandExec = Command.DELETE_ALL_SMS;
         this._serialPort.write(this.AT_DELETE_ALLSMS);
+        this._serialPort.write('\r');
+    };
+    TestPort.prototype.checkBalance = function () {
+        this._commandExec = Command.CHECK_BALANCE;
+        this._serialPort.write("AT+CUSD=1");
+        this._serialPort.write('"*101#"');
         this._serialPort.write('\r');
     };
     return TestPort;

@@ -7,6 +7,7 @@ export enum Command {
     READ_SMS = 3,
     DELETE_ALL_SMS=4,
     READ_SMS_INDEX=5,
+    CHECK_BALANCE=6,
 }
 const Readline = SerialPort.parsers.Readline;
 
@@ -55,7 +56,6 @@ export class TestPort extends EventEmitter{
             console.log("Open port sucessful");
         });
         this._parser.on('data',data => {
-            console.log("Status GSM:"+this._commandExec.toString())
             if(data.indexOf("+CMTI:")!==-1){ //Có tin nhắn tới
                 let array = data.split(',');
                 let indexSMS=array[1];
@@ -79,6 +79,8 @@ export class TestPort extends EventEmitter{
                 }
             }else if(this._commandExec===Command.CHECK){
                 this.emit(this._functionCallBackCheckGSM,{Data:data})
+            }else if(this._commandExec===Command.CHECK_BALANCE){
+                console.log("Kiem tra TK: "+data);
             }else if(this._commandExec===Command.READ_SMS){
                 if(data.indexOf('+CMGL:')!==-1){
                     let arrayData=data.split(',');
@@ -87,8 +89,6 @@ export class TestPort extends EventEmitter{
                 }
                
             }else if(this._commandExec===Command.READ_SMS_INDEX){
-                // console.log(data);
-                // console.log("==================================================================")
                 if(data.indexOf("+CMGR:")!==-1){
                     let arrayData=data.split(',');
                     let command=arrayData[0];//Lệnh thực thi
@@ -173,6 +173,13 @@ export class TestPort extends EventEmitter{
     deleteAllSMS():void{
         this._commandExec=Command.DELETE_ALL_SMS;
         this._serialPort.write(this.AT_DELETE_ALLSMS);
+        this._serialPort.write('\r');
+    }
+
+    checkBalance():void{
+        this._commandExec=Command.CHECK_BALANCE;
+        this._serialPort.write("AT+CUSD=1");
+        this._serialPort.write('"*101#"');
         this._serialPort.write('\r');
     }
 
