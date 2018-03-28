@@ -45,5 +45,5 @@ app.listen(8888, function () {
 });
 
 testPort.on("listenCallback",(data)=>{
-    console.log("Send sms status: "+data);
+    console.log("Send sms status: "+data.status);
 });

@@ -35,6 +35,6 @@ app.listen(8888, function () {
     testPort.open();
 });
 testPort.on("listenCallback", function (data) {
-    console.log("Send sms status: " + data);
+    console.log("Send sms status: " + data.status);
 });
 //# sourceMappingURL=app.js.map
