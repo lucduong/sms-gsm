@@ -85,8 +85,11 @@ var TestPort = (function (_super) {
                 _this.emit(_this._functionCallBackCheckGSM, { Data: data });
             }
             else if (_this._commandExec === Command.READ_SMS) {
-                console.log(data);
-                console.log("================================================");
+                if (data.indexOf('+CMGL:') !== -1) {
+                    var arrayData = data.split(',');
+                    console.log(arrayData);
+                    console.log("====================================================");
+                }
             }
             else if (_this._commandExec === Command.READ_SMS_INDEX) {
                 if (data.indexOf("+CMGR:") !== -1) {

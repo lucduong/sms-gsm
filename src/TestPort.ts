@@ -80,8 +80,12 @@ export class TestPort extends EventEmitter{
             }else if(this._commandExec===Command.CHECK){
                 this.emit(this._functionCallBackCheckGSM,{Data:data})
             }else if(this._commandExec===Command.READ_SMS){
-                console.log(data);
-                console.log("================================================")
+                if(data.indexOf('+CMGL:')!==-1){
+                    let arrayData=data.split(',');
+                    console.log(arrayData);
+                    console.log("====================================================")
+                }
+               
             }else if(this._commandExec===Command.READ_SMS_INDEX){
                 // console.log(data);
                 // console.log("==================================================================")
