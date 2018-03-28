@@ -87,7 +87,7 @@ var TestPort = (function (_super) {
             else if (_this._commandExec === Command.READ_SMS) {
                 if (data.indexOf('+CMGL:') !== -1) {
                     var arrayData = data.split(',');
-                    console.log(arrayData);
+                    console.log(arrayData[2]);
                     console.log("====================================================");
                 }
             }

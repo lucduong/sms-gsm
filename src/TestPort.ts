@@ -82,7 +82,7 @@ export class TestPort extends EventEmitter{
             }else if(this._commandExec===Command.READ_SMS){
                 if(data.indexOf('+CMGL:')!==-1){
                     let arrayData=data.split(',');
-                    console.log(arrayData);
+                    console.log(arrayData[2]);
                     console.log("====================================================")
                 }
                
