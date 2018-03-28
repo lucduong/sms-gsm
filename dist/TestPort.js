@@ -29,7 +29,7 @@ var TestPort = (function (_super) {
         var _this = _super.call(this) || this;
         _this.AT_CHECK = "AT+CPIN?";
         _this.AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
-        _this.AT_CHANGE_MOD_SMS = "AT+CMGF=0";
+        _this.AT_CHANGE_MOD_SMS = "AT+CMGF=1";
         _this.AT_SEND_SMS = "AT+CMGS=\"";
         _this.AT_READ_UNREAD = "AT+CMGL=\"ALL\"";
         _this.AT_DELETE_ALLSMS = "AT+CMGD=1,4";
@@ -149,13 +149,15 @@ var TestPort = (function (_super) {
         this._commandExec = Command.SEND_SMS;
         this._statusSendSMS = 0;
         this._locked = true;
-        var dataPdu = pdu(message.smsContent, message.phoneNumber, null, 16);
-        console.log("Data sau khi convert: " + dataPdu.pdu);
+        var buffer = Buffer.from(message.smsContent);
         this._serialPort.write(this.AT_CHANGE_MOD_SMS);
-        this._serialPort.write('\n');
-        this._serialPort.write(dataPdu.command);
-        this._serialPort.write('\n');
-        this._serialPort.write(dataPdu.pdu);
+        this._serialPort.write('\r');
+        this._serialPort.write(this.AT_SEND_SMS);
+        this._serialPort.write(message.phoneNumber);
+        this._serialPort.write('"');
+        this._serialPort.write('\r');
+        this._serialPort.write(buffer);
+        this._serialPort.write(new Buffer([0x1A]));
         this._serialPort.write('^z');
     };
     TestPort.prototype.readMessage = function () {

@@ -17,7 +17,7 @@ export class TestPort extends EventEmitter{
     private _parser:EventEmitter;
     private AT_CHECK = "AT+CPIN?";
     private AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
-    private AT_CHANGE_MOD_SMS = "AT+CMGF=0";
+    private AT_CHANGE_MOD_SMS = "AT+CMGF=1";
     private AT_SEND_SMS = "AT+CMGS=\"";
     private AT_READ_UNREAD="AT+CMGL=\"ALL\"";
     private AT_DELETE_ALLSMS="AT+CMGD=1,4";
@@ -145,24 +145,24 @@ export class TestPort extends EventEmitter{
         this._commandExec=Command.SEND_SMS;
         this._statusSendSMS=0;
         this._locked=true;
-        // const buffer = Buffer.from(message.smsContent);
+        const buffer = Buffer.from(message.smsContent);
+        this._serialPort.write(this.AT_CHANGE_MOD_SMS);
+        this._serialPort.write('\r');
+        this._serialPort.write(this.AT_SEND_SMS);
+        this._serialPort.write(message.phoneNumber);
+        this._serialPort.write('"')
+        this._serialPort.write('\r');
+        this._serialPort.write(buffer);
+        this._serialPort.write(new Buffer([0x1A]));
+        this._serialPort.write('^z');
+        // const dataPdu=pdu(message.smsContent, message.phoneNumber, null, 16);
+        // console.log("Data sau khi convert: "+dataPdu.pdu);
         // this._serialPort.write(this.AT_CHANGE_MOD_SMS);
         // this._serialPort.write('\r');
-        // this._serialPort.write(this.AT_SEND_SMS);
-        // this._serialPort.write(message.phoneNumber);
-        // this._serialPort.write('"')
+        // this._serialPort.write(dataPdu.command);
         // this._serialPort.write('\r');
-        // this._serialPort.write(buffer);
-        // this._serialPort.write(new Buffer([0x1A]));
+        // this._serialPort.write(dataPdu.pdu);
         // this._serialPort.write('^z');
-        const dataPdu=pdu(message.smsContent, message.phoneNumber, null, 16);
-        console.log("Data sau khi convert: "+dataPdu.pdu);
-        this._serialPort.write(this.AT_CHANGE_MOD_SMS);
-        this._serialPort.write('\n');
-        this._serialPort.write(dataPdu.command);
-        this._serialPort.write('\n');
-        this._serialPort.write(dataPdu.pdu);
-        this._serialPort.write('^z');
     }
 
     readMessage():void{
