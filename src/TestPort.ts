@@ -71,6 +71,7 @@ export class TestPort extends EventEmitter{
                 } else if (this._statusSendSMS === 1) {
                     this._statusSendSMS = 0;
                     this._locked = false;
+                    this._commandExec=Command.READ_SMS;
                     if (data.indexOf("OK")!==-1&&data.length===2) {
                         this.emit(this._functionCallBackSendSms,{status:true})
                     }else{
@@ -78,8 +79,7 @@ export class TestPort extends EventEmitter{
                     }
                 }
             }else if(this._commandExec===Command.CHECK){
-                console.log(`Port name: ${this._port}` +data)
-                //this.emit(this._functionCallBackCheckGSM,{Data:data})
+                this.emit(this._functionCallBackCheckGSM,{Data:data})
             }else if(this._commandExec===Command.CHECK_BALANCE){
                 console.log("Kiem tra TK: "+data);
             }else if(this._commandExec===Command.READ_SMS){
@@ -88,7 +88,6 @@ export class TestPort extends EventEmitter{
                     console.log(arrayData[2]);
                     console.log("====================================================")
                 }
-               
             }else if(this._commandExec===Command.READ_SMS_INDEX){
                 if(data.indexOf("+CMGR:")!==-1){
                     let arrayData=data.split(',');
@@ -180,7 +179,6 @@ export class TestPort extends EventEmitter{
     checkBalance():void{
         this._commandExec=Command.CHECK_BALANCE;
         this._serialPort.write("AT+CUSD=1,\"*101#\"");
-        //this._serialPort.write('"*101#"');
         this._serialPort.write('\r');
     }
 

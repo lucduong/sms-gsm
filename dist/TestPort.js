@@ -73,6 +73,7 @@ var TestPort = (function (_super) {
                 else if (_this._statusSendSMS === 1) {
                     _this._statusSendSMS = 0;
                     _this._locked = false;
+                    _this._commandExec = Command.READ_SMS;
                     if (data.indexOf("OK") !== -1 && data.length === 2) {
                         _this.emit(_this._functionCallBackSendSms, { status: true });
                     }
@@ -82,7 +83,7 @@ var TestPort = (function (_super) {
                 }
             }
             else if (_this._commandExec === Command.CHECK) {
-                console.log("Port name: " + _this._port + data);
+                _this.emit(_this._functionCallBackCheckGSM, { Data: data });
             }
             else if (_this._commandExec === Command.CHECK_BALANCE) {
                 console.log("Kiem tra TK: " + data);

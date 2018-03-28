@@ -21,5 +21,5 @@ testPort.open().then(()=>{
     //testPort.checkGsm();
     //testPort.readMessage();
     //testPort.deleteAllSMS()
-    testPort.checkBalance();
+    //testPort.checkBalance();
 })
