@@ -26,7 +26,7 @@ const handleSendSMS = (req, res) => {
       return res.json({ message: 'Credentials are invalid.' })
     }
   
-    if (!to || !/(84)[\d]{9,10}$/.test(to)) {
+    if (!to || !/(0)[\d]{9,10}$/.test(to)) {
       return res.json({ message: `Phone number (${to}) is invalid.` });
     }
 
@@ -42,4 +42,8 @@ app.post('/api/v1/sms', handleSendSMS);
 app.listen(8888, function () {
     console.log("Server is running");
     testPort.open();
+});
+
+testPort.on("listenCallback",(data)=>{
+    console.log("Send sms status: "+data);
 });

@@ -20,7 +20,7 @@ var handleSendSMS = function (req, res) {
     if (api_key !== 'RpD48RnY56dY3NRWyeHKOXy0djTQRuz6' || api_secret !== 'TX3scXwg9S8rLxE5oz7OWxdH1dxRNb4Y') {
         return res.json({ message: 'Credentials are invalid.' });
     }
-    if (!to || !/(84)[\d]{9,10}$/.test(to)) {
+    if (!to || !/(0)[\d]{9,10}$/.test(to)) {
         return res.json({ message: "Phone number (" + to + ") is invalid." });
     }
     var messageSend = new Message_1.Message(text, to);
@@ -33,5 +33,8 @@ app.post('/api/v1/sms', handleSendSMS);
 app.listen(8888, function () {
     console.log("Server is running");
     testPort.open();
+});
+testPort.on("listenCallback", function (data) {
+    console.log("Send sms status: " + data);
 });
 //# sourceMappingURL=app.js.map
