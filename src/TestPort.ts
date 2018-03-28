@@ -155,8 +155,8 @@ export class TestPort extends EventEmitter{
         // this._serialPort.write(buffer);
         // this._serialPort.write(new Buffer([0x1A]));
         // this._serialPort.write('^z');
-        this._serialPort.write('AT+CMGF ?');
-        
+        this._serialPort.write('AT+CMGF?');
+        this._serialPort.write('\r');
         
         // const dataPdu=pdu(message.smsContent, message.phoneNumber, null, 16);
         // console.log("Data sau khi convert: "+dataPdu.pdu);

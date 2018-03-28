@@ -149,7 +149,8 @@ var TestPort = (function (_super) {
         this._commandExec = Command.SEND_SMS;
         this._statusSendSMS = 0;
         this._locked = true;
-        this._serialPort.write('AT+CMGF ?');
+        this._serialPort.write('AT+CMGF?');
+        this._serialPort.write('\r');
     };
     TestPort.prototype.readMessage = function () {
         this._commandExec = Command.READ_SMS;
