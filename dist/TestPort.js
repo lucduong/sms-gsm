@@ -153,9 +153,9 @@ var TestPort = (function (_super) {
         console.log("Data sau khi convert: " + dataPdu.pdu);
         this._serialPort.write(this.AT_CHANGE_MOD_SMS);
         this._serialPort.write('\r');
-        this._serialPort.write(dataPdu.command);
+        this._serialPort.write("AT+CMGS=14");
         this._serialPort.write('\r');
-        this._serialPort.write(dataPdu.pdu);
+        this._serialPort.write("0001030691214365000004C9E9340B");
         this._serialPort.write('^z');
     };
     TestPort.prototype.readMessage = function () {
