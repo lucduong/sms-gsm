@@ -14,5 +14,6 @@ testPort.on("listenCallBackReadSms", function (data) {
     console.log("Read SMS: " + data.Data);
 });
 testPort.open().then(function () {
+    testPort.sendSms(message);
 });
 //# sourceMappingURL=test-gsm.js.map
