@@ -42,7 +42,7 @@ app.post('/api/v1/sms', handleSendSMS);
 app.listen(8888, function () {
     console.log("Server is running");
     testPort.open();
-    createDb.then((resolve , reject)=>{
+    createDb().then((resolve , reject)=>{
         if(reject){
             console.log(reject)
         }
