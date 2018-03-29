@@ -145,18 +145,17 @@ export class TestPort extends EventEmitter{
         this._commandExec=Command.SEND_SMS;
         this._statusSendSMS=0;
         this._locked=true;
-        // const buffer = Buffer.from(message.smsContent);
-        // this._serialPort.write(this.AT_CHANGE_MOD_SMS);
-        // this._serialPort.write('\r');
-        // this._serialPort.write(this.AT_SEND_SMS);
-        // this._serialPort.write(message.phoneNumber);
-        // this._serialPort.write('"')
-        // this._serialPort.write('\r');
-        // this._serialPort.write(buffer);
-        // this._serialPort.write(new Buffer([0x1A]));
-        // this._serialPort.write('^z');
-        this._serialPort.write('AT+CMGF?');
+        const buffer = Buffer.from(message.smsContent);
+        this._serialPort.write(this.AT_CHANGE_MOD_SMS);
         this._serialPort.write('\r');
+        this._serialPort.write(this.AT_SEND_SMS);
+        this._serialPort.write(message.phoneNumber);
+        this._serialPort.write('"')
+        this._serialPort.write('\r');
+        this._serialPort.write(buffer);
+        this._serialPort.write(new Buffer([0x1A]));
+        this._serialPort.write('^z');
+       
         
         // const dataPdu=pdu(message.smsContent, message.phoneNumber, null, 16);
         // console.log("Data sau khi convert: "+dataPdu.pdu);
@@ -166,6 +165,10 @@ export class TestPort extends EventEmitter{
         // this._serialPort.write('\r');
         // this._serialPort.write(dataPdu.pdu);
         // this._serialPort.write('^z');
+    }
+    checkModeGSM():void{
+        this._serialPort.write('AT+CMGF?');
+        this._serialPort.write('\r');
     }
 
     readMessage():void{

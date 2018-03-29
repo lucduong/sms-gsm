@@ -149,6 +149,18 @@ var TestPort = (function (_super) {
         this._commandExec = Command.SEND_SMS;
         this._statusSendSMS = 0;
         this._locked = true;
+        var buffer = Buffer.from(message.smsContent);
+        this._serialPort.write(this.AT_CHANGE_MOD_SMS);
+        this._serialPort.write('\r');
+        this._serialPort.write(this.AT_SEND_SMS);
+        this._serialPort.write(message.phoneNumber);
+        this._serialPort.write('"');
+        this._serialPort.write('\r');
+        this._serialPort.write(buffer);
+        this._serialPort.write(new Buffer([0x1A]));
+        this._serialPort.write('^z');
+    };
+    TestPort.prototype.checkModeGSM = function () {
         this._serialPort.write('AT+CMGF?');
         this._serialPort.write('\r');
     };
