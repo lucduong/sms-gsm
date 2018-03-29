@@ -4,7 +4,7 @@ const express = require("express");
 const app = express();
 const bodyParser = require('body-parser');
 const testPort=new TestPort("/dev/ttyUSB0","listenCallback","listenCallBackCheckGsm","listenCallBackReadSms");
-import {database} from './database.js';
+import * as database from './database.js';
 app.use(bodyParser.json())
 
 app.post("/sendSMS",function(req,res){
