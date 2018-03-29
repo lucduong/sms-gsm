@@ -4,7 +4,7 @@ const express = require("express");
 const app = express();
 const bodyParser = require('body-parser');
 const testPort=new TestPort("/dev/ttyUSB0","listenCallback","listenCallBackCheckGsm","listenCallBackReadSms");
-import {createDb} from './database.js';
+import {database} from './database.js';
 app.use(bodyParser.json())
 
 app.post("/sendSMS",function(req,res){
@@ -42,7 +42,7 @@ app.post('/api/v1/sms', handleSendSMS);
 app.listen(8888, function () {
     console.log("Server is running");
     testPort.open();
-    createDb().then((resolve , reject)=>{
+    database.createDb().then((resolve , reject)=>{
         if(reject){
             console.log(reject)
         }
