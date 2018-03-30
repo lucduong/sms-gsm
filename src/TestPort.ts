@@ -28,6 +28,7 @@ export class TestPort extends EventEmitter{
     private _functionCallBackSendSms:string;
     private _functionCallBackCheckGSM:string;
     private _functionCallBackReadSMS:string;
+    private _functionCallBackCheckBalance:string;
     private _commandExec: Command;
     private _statusSendSMS: number;
     private _locked: Boolean;
@@ -79,7 +80,7 @@ export class TestPort extends EventEmitter{
                     this._locked = false;
                     this._commandExec=Command.READ_SMS;
                     if (data.indexOf("OK")!==-1&&data.length===2) {
-                        this.emit(this._functionCallBackSendSms,{status:true})
+                        this.emit(this._functionCallBackSendSms,{status:true,port:this._port})
                     }else{
                         this.emit(this._functionCallBackSendSms,{status:false})
                     }
@@ -215,6 +216,38 @@ export class TestPort extends EventEmitter{
         this._serialPort.write('\r');
     }
 
+
+    get functionCallBackSendSms(): string {
+        return this._functionCallBackSendSms;
+      }
+    
+    set functionCallBackSendSms(val: string) {
+        this._functionCallBackSendSms = val;
+    }
+
+    get functionCallBackCheckGSM(): string {
+        return this._functionCallBackCheckGSM;
+      }
+    
+    set functionCallBackCheckGSM(val: string) {
+        this._functionCallBackCheckGSM = val;
+    }
+
+    get functionCallBackReadSMS(): string {
+        return this._functionCallBackReadSMS;
+      }
+    
+    set functionCallBackReadSMS(val: string) {
+        this._functionCallBackReadSMS = val;
+    }
+
+    get functionCallBackCheckBalance(): string {
+        return this._functionCallBackCheckBalance;
+      }
+    
+    set functionCallBackCheckBalance(val: string) {
+        this._functionCallBackCheckBalance = val;
+    }
 }
 
 

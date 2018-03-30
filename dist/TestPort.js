@@ -81,7 +81,7 @@ var TestPort = (function (_super) {
                     _this._locked = false;
                     _this._commandExec = Command.READ_SMS;
                     if (data.indexOf("OK") !== -1 && data.length === 2) {
-                        _this.emit(_this._functionCallBackSendSms, { status: true });
+                        _this.emit(_this._functionCallBackSendSms, { status: true, port: _this._port });
                     }
                     else {
                         _this.emit(_this._functionCallBackSendSms, { status: false });
@@ -201,6 +201,46 @@ var TestPort = (function (_super) {
         this._serialPort.write("AT+CUSD=1,\"*101#\"");
         this._serialPort.write('\r');
     };
+    Object.defineProperty(TestPort.prototype, "functionCallBackSendSms", {
+        get: function () {
+            return this._functionCallBackSendSms;
+        },
+        set: function (val) {
+            this._functionCallBackSendSms = val;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(TestPort.prototype, "functionCallBackCheckGSM", {
+        get: function () {
+            return this._functionCallBackCheckGSM;
+        },
+        set: function (val) {
+            this._functionCallBackCheckGSM = val;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(TestPort.prototype, "functionCallBackReadSMS", {
+        get: function () {
+            return this._functionCallBackReadSMS;
+        },
+        set: function (val) {
+            this._functionCallBackReadSMS = val;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(TestPort.prototype, "functionCallBackCheckBalance", {
+        get: function () {
+            return this._functionCallBackCheckBalance;
+        },
+        set: function (val) {
+            this._functionCallBackCheckBalance = val;
+        },
+        enumerable: true,
+        configurable: true
+    });
     return TestPort;
 }(events_1.EventEmitter));
 exports.TestPort = TestPort;
