@@ -9,6 +9,7 @@ export enum Command {
     READ_SMS_INDEX=5,
     CHECK_BALANCE=6,
     GET_OPERATOR=7,
+    GET_PHONE_NUMBER=8,
 }
 const Readline = SerialPort.parsers.Readline;
 const pdu  = require("sms-pdu-node")
@@ -23,6 +24,7 @@ export class TestPort extends EventEmitter{
     private AT_READ_UNREAD="AT+CMGL=\"ALL\"";
     private AT_DELETE_ALLSMS="AT+CMGD=1,4";
     private AT_GET_OPERATOR="AT+COPS=?";
+    private AT_GET_PHONE_NUMBER="AT+CNUM";
     private _functionCallBackSendSms:string;
     private _functionCallBackCheckGSM:string;
     private _functionCallBackReadSMS:string;
@@ -190,6 +192,12 @@ export class TestPort extends EventEmitter{
     getOperatorNetwork():void{
         this._commandExec=Command.GET_OPERATOR;
         this._serialPort.write(this.AT_GET_OPERATOR);
+        this._serialPort.write('\r');
+    }
+
+    getPhoneNumber():void{
+        this._commandExec=Command.GET_PHONE_NUMBER;
+        this._serialPort.write(this.AT_GET_PHONE_NUMBER);
         this._serialPort.write('\r');
     }
 

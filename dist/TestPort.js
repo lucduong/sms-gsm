@@ -21,6 +21,7 @@ var Command;
     Command[Command["READ_SMS_INDEX"] = 5] = "READ_SMS_INDEX";
     Command[Command["CHECK_BALANCE"] = 6] = "CHECK_BALANCE";
     Command[Command["GET_OPERATOR"] = 7] = "GET_OPERATOR";
+    Command[Command["GET_PHONE_NUMBER"] = 8] = "GET_PHONE_NUMBER";
 })(Command = exports.Command || (exports.Command = {}));
 var Readline = SerialPort.parsers.Readline;
 var pdu = require("sms-pdu-node");
@@ -35,6 +36,7 @@ var TestPort = (function (_super) {
         _this.AT_READ_UNREAD = "AT+CMGL=\"ALL\"";
         _this.AT_DELETE_ALLSMS = "AT+CMGD=1,4";
         _this.AT_GET_OPERATOR = "AT+COPS=?";
+        _this.AT_GET_PHONE_NUMBER = "AT+CNUM";
         _this._isOpen = false;
         _this._port = port;
         _this._functionCallBackSendSms = functionCallBackSendSms;
@@ -179,6 +181,11 @@ var TestPort = (function (_super) {
     TestPort.prototype.getOperatorNetwork = function () {
         this._commandExec = Command.GET_OPERATOR;
         this._serialPort.write(this.AT_GET_OPERATOR);
+        this._serialPort.write('\r');
+    };
+    TestPort.prototype.getPhoneNumber = function () {
+        this._commandExec = Command.GET_PHONE_NUMBER;
+        this._serialPort.write(this.AT_GET_PHONE_NUMBER);
         this._serialPort.write('\r');
     };
     TestPort.prototype.deleteAllSMS = function () {
