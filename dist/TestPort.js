@@ -35,7 +35,7 @@ var TestPort = (function (_super) {
         _this.AT_SEND_SMS = "AT+CMGS=\"";
         _this.AT_READ_UNREAD = "AT+CMGL=\"ALL\"";
         _this.AT_DELETE_ALLSMS = "AT+CMGD=1,4";
-        _this.AT_GET_OPERATOR = "AT+COPS?";
+        _this.AT_GET_OPERATOR = "AT+COPS=?";
         _this.AT_GET_PHONE_NUMBER = "AT+CNUM";
         _this._isOpen = false;
         _this._port = port;
