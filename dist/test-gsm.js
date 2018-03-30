@@ -14,6 +14,6 @@ testPort.on("listenCallBackReadSms", function (data) {
     console.log("Read SMS: " + data.Data);
 });
 testPort.open().then(function () {
-    testPort.getPhoneNumber();
+    testPort.getOperatorNetwork();
 });
 //# sourceMappingURL=test-gsm.js.map

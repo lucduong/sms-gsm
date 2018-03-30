@@ -23,6 +23,6 @@ testPort.open().then(()=>{
     //testPort.readMessage();
     //testPort.deleteAllSMS()
     //testPort.checkBalance();
-    //testPort.getOperatorNetwork();
-    testPort.getPhoneNumber();
+    testPort.getOperatorNetwork();
+    //testPort.getPhoneNumber();
 })
