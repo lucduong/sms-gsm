@@ -18,10 +18,10 @@ testPort.on("listenCallBackReadSms",(data)=>{
 
 testPort.open().then(()=>{
     //testPort.checkGsm();
-    testPort.sendSms(message);
+    //testPort.sendSms(message);
     
     //testPort.readMessage();
     //testPort.deleteAllSMS()
-    //testPort.checkBalance();
+    testPort.checkBalance();
     //testPort.getOperatorNetwork();
 })
