@@ -2,7 +2,7 @@ import {TestPort} from './TestPort';
 import {Message} from './Message';
 const message=new Message("Test goi tin nhan","0938256706");
 
-const testPort=new TestPort("/dev/ttyUSB1","listenCallback","listenCallBackCheckGsm","listenCallBackReadSms");
+const testPort=new TestPort("/dev/ttyUSB0","listenCallback","listenCallBackCheckGsm","listenCallBackReadSms");
 
 testPort.on("listenCallback",(Data)=>{
     console.log(Data)
@@ -18,11 +18,11 @@ testPort.on("listenCallBackReadSms",(data)=>{
 
 testPort.open().then(()=>{
     //testPort.checkGsm();
-    //testPort.sendSms(message);
+    testPort.sendSms(message);
     
     //testPort.readMessage();
     //testPort.deleteAllSMS()
     //testPort.checkBalance();
-    testPort.getOperatorNetwork();
+    //testPort.getOperatorNetwork();
     //testPort.getPhoneNumber();
 })

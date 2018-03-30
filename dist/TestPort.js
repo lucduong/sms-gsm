@@ -94,6 +94,9 @@ var TestPort = (function (_super) {
             else if (_this._commandExec === Command.CHECK_BALANCE) {
                 console.log("Kiem tra TK: " + data);
             }
+            else if (_this._commandExec === Command.GET_OPERATOR) {
+                console.log("Thông tin nhà mạng: " + data);
+            }
             else if (_this._commandExec === Command.READ_SMS) {
                 if (data.indexOf('+CMGL:') !== -1) {
                     var arrayData = data.split(',');

@@ -88,6 +88,8 @@ export class TestPort extends EventEmitter{
                 this.emit(this._functionCallBackCheckGSM,{Data:data})
             }else if(this._commandExec===Command.CHECK_BALANCE){
                 console.log("Kiem tra TK: "+data);
+            }else if(this._commandExec===Command.GET_OPERATOR){
+                console.log("Thông tin nhà mạng: "+data);
             }else if(this._commandExec===Command.READ_SMS){
                 if(data.indexOf('+CMGL:')!==-1){
                     let arrayData=data.split(',');
