@@ -42,11 +42,11 @@ app.post('/api/v1/sms', handleSendSMS);
 app.listen(8888, function () {
     console.log("Server is running");
     testPort.open();
-    database.createDb().then((resolve , reject)=>{
-        if(reject){
-            console.log(reject)
-        }
-    });
+    // database.createDb().then((resolve , reject)=>{
+    //     if(reject){
+    //         console.log(reject)
+    //     }
+    // });
 });
 
 testPort.on("listenCallback",(data)=>{

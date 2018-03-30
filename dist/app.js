@@ -6,7 +6,6 @@ var express = require("express");
 var app = express();
 var bodyParser = require('body-parser');
 var testPort = new TestPort_1.TestPort("/dev/ttyUSB0", "listenCallback", "listenCallBackCheckGsm", "listenCallBackReadSms");
-var database = require("./database.js");
 app.use(bodyParser.json());
 app.post("/sendSMS", function (req, res) {
     var numberSend = req.body.mobile;
@@ -34,11 +33,6 @@ app.post('/api/v1/sms', handleSendSMS);
 app.listen(8888, function () {
     console.log("Server is running");
     testPort.open();
-    database.createDb().then(function (resolve, reject) {
-        if (reject) {
-            console.log(reject);
-        }
-    });
 });
 testPort.on("listenCallback", function (data) {
     console.log("Send sms status: " + data.status);
