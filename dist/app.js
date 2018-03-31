@@ -5,7 +5,7 @@ var Message_1 = require("./Message");
 var express = require("express");
 var app = express();
 var bodyParser = require('body-parser');
-var testPort = new TestPort_1.TestPort("/dev/ttyUSB0", "listenCallback", "listenCallBackCheckGsm", "listenCallBackReadSms");
+var testPort = new TestPort_1.TestPort("/dev/ttyUSB0");
 app.use(bodyParser.json());
 app.post("/sendSMS", function (req, res) {
     var numberSend = req.body.mobile;

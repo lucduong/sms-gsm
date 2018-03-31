@@ -27,7 +27,7 @@ var Readline = SerialPort.parsers.Readline;
 var pdu = require("sms-pdu-node");
 var TestPort = (function (_super) {
     __extends(TestPort, _super);
-    function TestPort(port, functionCallBackSendSms, functionCallBackCheckGsm, functionCallBackreadSms) {
+    function TestPort(port) {
         var _this = _super.call(this) || this;
         _this.AT_CHECK = "AT+CPIN?";
         _this.AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
@@ -37,11 +37,10 @@ var TestPort = (function (_super) {
         _this.AT_DELETE_ALLSMS = "AT+CMGD=1,4";
         _this.AT_GET_OPERATOR = "AT+COPS=?";
         _this.AT_GET_PHONE_NUMBER = "AT+CNUM";
+        _this._regexGetBalanceVina = /[\d,]+\s/g;
+        _this._regexGetBalanceVietnamemobile = /[\d,.]+\s?[dD]/g;
         _this._isOpen = false;
         _this._port = port;
-        _this._functionCallBackSendSms = functionCallBackSendSms;
-        _this._functionCallBackCheckGSM = functionCallBackCheckGsm;
-        _this._functionCallBackReadSMS = functionCallBackreadSms;
         _this._serialPort = _this.createNewSerialPort(_this._port);
         _this._parser = _this._serialPort.pipe(new Readline({ delimiter: '\r\n' }));
         _this.bindEnven();
@@ -84,7 +83,7 @@ var TestPort = (function (_super) {
                         _this.emit(_this._functionCallBackSendSms, { status: true, port: _this._port });
                     }
                     else {
-                        _this.emit(_this._functionCallBackSendSms, { status: false });
+                        _this.emit(_this._functionCallBackSendSms, { status: false, port: _this._port });
                     }
                 }
             }
@@ -92,7 +91,22 @@ var TestPort = (function (_super) {
                 _this.emit(_this._functionCallBackCheckGSM, { Data: data });
             }
             else if (_this._commandExec === Command.CHECK_BALANCE) {
-                console.log("Kiem tra TK: " + data);
+                var balance = "";
+                if (_this._telco.indexOf("vinaphone") !== -1) {
+                    if (_this._regexGetBalanceVina.test(data)) {
+                        console.log("Kiem tra TK: " + data);
+                        balance = data.match(_this._regexGetBalanceVina)[0];
+                        console.log("So tien trong TK: " + balance);
+                    }
+                }
+                else if (_this._telco.indexOf("vietnamobile") !== -1) {
+                    if (_this._regexGetBalanceVietnamemobile.test(data)) {
+                        console.log("Kiem tra TK: " + data);
+                        balance = data.match(_this._regexGetBalanceVietnamemobile)[0];
+                        console.log("So tien trong TK: " + balance);
+                    }
+                }
+                _this.emit(_this._functionCallBackCheckBalance, { balance: balance, port: _this._port });
             }
             else if (_this._commandExec === Command.GET_OPERATOR) {
                 console.log("Thông tin nhà mạng: " + data);
@@ -237,6 +251,26 @@ var TestPort = (function (_super) {
         },
         set: function (val) {
             this._functionCallBackCheckBalance = val;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(TestPort.prototype, "isOpen", {
+        get: function () {
+            return this._isOpen;
+        },
+        set: function (val) {
+            this._isOpen = val;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(TestPort.prototype, "telco", {
+        get: function () {
+            return this._telco;
+        },
+        set: function (val) {
+            this._telco = val;
         },
         enumerable: true,
         configurable: true
