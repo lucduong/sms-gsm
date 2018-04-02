@@ -17,7 +17,7 @@ testPort.functionCallBackReadSMS="listenCallBackReadSms";
 
 testPort.open().then(()=>{
     //testPort.checkGsm();
-    testPort.sendSms(message);
+    //testPort.sendSms(message);
     //testPort.deleteAllSMS();
     // setTimeout(function(){
     //     if(i===0){
@@ -31,7 +31,7 @@ testPort.open().then(()=>{
     //testPort.deleteSMSIndex(10);
     //testPort.readMessage();
     //testPort.resetGsm();
-    //testPort.checkBalance();
+    testPort.checkBalance();
     //testPort.getOperatorNetwork();
     //testPort.getPhoneNumber();
 })

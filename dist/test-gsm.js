@@ -8,7 +8,7 @@ var testPort = new TestPort_1.TestPort("/dev/ttyUSB0");
 var i = 0;
 testPort.functionCallBackReadSMS = "listenCallBackReadSms";
 testPort.open().then(function () {
-    testPort.sendSms(message);
+    testPort.checkBalance();
 });
 testPort.on("listenCallBackReadSms", function (data) {
     console.log("Read SMS: " + data);
