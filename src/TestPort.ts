@@ -22,7 +22,7 @@ export class TestPort extends EventEmitter{
     private AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
     private AT_CHANGE_MOD_SMS = "AT+CMGF=1";
     private AT_SEND_SMS = "AT+CMGS=\"";
-    private AT_READ_UNREAD="AT+CMGL=\"ALL\"";
+    private AT_READ_UNREAD="AT+CMGL=\"REC UNREAD\"";
     private AT_DELETE_ALLSMS="AT+CMGD=1,4";
     private AT_GET_OPERATOR="AT+COPS=?";
     private AT_GET_PHONE_NUMBER="AT+CNUM";
