@@ -7,7 +7,7 @@ var _ = require('lodash');
 var testPort = new TestPort_1.TestPort("/dev/ttyUSB0");
 testPort.functionCallBackReadSMS = "listenCallBackReadSms";
 testPort.open().then(function () {
-    testPort.getOperatorNetwork();
+    testPort.readMessage();
 });
 testPort.on("listenCallBackReadSms", function (data) {
     console.log("Read SMS: " + data.Data);
