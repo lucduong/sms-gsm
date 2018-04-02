@@ -2,7 +2,7 @@ import {TestPort} from './TestPort';
 import {Message} from './Message';
 const message=new Message("Test goi tin nhan","0938256706");
 const _ = require('lodash');
-const testPort=new TestPort("/dev/ttyUSB1");
+const testPort=new TestPort("/dev/ttyUSB0");
 let i=0;
 testPort.functionCallBackReadSMS="listenCallBackReadSms";
 // testPort.on("listenCallback",(Data)=>{
@@ -18,7 +18,7 @@ testPort.functionCallBackReadSMS="listenCallBackReadSms";
 testPort.open().then(()=>{
     //testPort.checkGsm();
     //testPort.sendSms(message);
-    testPort.deleteAllSMS();
+    //testPort.deleteAllSMS();
     // setTimeout(function(){
     //     if(i===0){
     //         testPort.readMessage();
