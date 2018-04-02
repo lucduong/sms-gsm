@@ -9,7 +9,7 @@ var i = 0;
 testPort.functionCallBackReadSMS = "listenCallBackReadSms";
 testPort.telco = "vinaphone";
 testPort.open().then(function () {
-    testPort.checkBalance();
+    testPort.sendSms(message);
 });
 testPort.on("listenCallBackReadSms", function (data) {
     console.log("Read SMS: " + data);
