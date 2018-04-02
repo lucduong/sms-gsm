@@ -3,6 +3,7 @@ import {Message} from './Message';
 const message=new Message("Test goi tin nhan","0938256706");
 const _ = require('lodash');
 const testPort=new TestPort("/dev/ttyUSB0");
+let i=0;
 testPort.functionCallBackReadSMS="listenCallBackReadSms";
 // testPort.on("listenCallback",(Data)=>{
 //     console.log(Data)
@@ -19,7 +20,13 @@ testPort.open().then(()=>{
     testPort.sendSms(message);
     //testPort.deleteAllSMS();
     setTimeout(function(){
-        testPort.readMessage();
+        if(i===0){
+            testPort.readMessage();
+            i++;
+        }else{
+            return;
+        }
+        
     }, 2000);
    
     //testPort.changeModeReceiveSMS();
