@@ -34,10 +34,11 @@ var TestPort = (function (_super) {
         _this.AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
         _this.AT_CHANGE_MOD_SMS = "AT+CMGF=1";
         _this.AT_SEND_SMS = "AT+CMGS=\"";
-        _this.AT_READ_UNREAD = "AT+CMGL=\"ALL\"";
+        _this.AT_READ_UNREAD = "AT+CMGL=\"REC UNREAD\"";
         _this.AT_DELETE_ALLSMS = "AT+CMGD=1,4";
         _this.AT_GET_OPERATOR = "AT+COPS=?";
         _this.AT_GET_PHONE_NUMBER = "AT+CNUM";
+        _this.AT_CHANGE_MOD_RECEIVE_SMS = "AT+CNMI=2,1,0,0,0";
         _this._regexGetBalanceVina = /[\d,]+\s/g;
         _this._regexGetBalanceVietnamemobile = /[\d,.]+\s?[dD]/g;
         _this._isOpen = false;
@@ -121,6 +122,9 @@ var TestPort = (function (_super) {
                     console.log(arrayData[2]);
                     console.log("====================================================");
                 }
+                else {
+                    _this.changeModeReceiveSMS();
+                }
             }
             else if (_this._commandExec === Command.READ_SMS_INDEX) {
                 if (data.indexOf("+CMGR:") !== -1) {
@@ -141,6 +145,7 @@ var TestPort = (function (_super) {
                     _this._readingSMS = false;
                     _this._commandExec = Command.READ_SMS;
                     console.log("=============Finish========================");
+                    _this.changeModeReceiveSMS();
                 }
                 else if (_this._readingSMS) {
                     console.log("=============Start body========================");
@@ -221,6 +226,10 @@ var TestPort = (function (_super) {
     TestPort.prototype.checkBalance = function () {
         this._commandExec = Command.CHECK_BALANCE;
         this._serialPort.write("AT+CUSD=1,\"*101#\"");
+        this._serialPort.write('\r');
+    };
+    TestPort.prototype.changeModeReceiveSMS = function () {
+        this._serialPort.write(this.AT_CHANGE_MOD_RECEIVE_SMS);
         this._serialPort.write('\r');
     };
     Object.defineProperty(TestPort.prototype, "functionCallBackSendSms", {

@@ -22,10 +22,11 @@ export class TestPort extends EventEmitter{
     private AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
     private AT_CHANGE_MOD_SMS = "AT+CMGF=1";
     private AT_SEND_SMS = "AT+CMGS=\"";
-    private AT_READ_UNREAD="AT+CMGL=\"ALL\"";
+    private AT_READ_UNREAD="AT+CMGL=\"REC UNREAD\"";
     private AT_DELETE_ALLSMS="AT+CMGD=1,4";
     private AT_GET_OPERATOR="AT+COPS=?";
     private AT_GET_PHONE_NUMBER="AT+CNUM";
+    private AT_CHANGE_MOD_RECEIVE_SMS="AT+CNMI=2,1,0,0,0";
     private _functionCallBackSendSms:string;
     private _functionCallBackCheckGSM:string;
     private _functionCallBackReadSMS:string;
@@ -115,7 +116,11 @@ export class TestPort extends EventEmitter{
                     let arrayData=data.split(',');
                     console.log(arrayData[2]);
                     console.log("====================================================")
+
+                }else{
+                   this.changeModeReceiveSMS();
                 }
+                
             }else if(this._commandExec===Command.READ_SMS_INDEX){
                 if(data.indexOf("+CMGR:")!==-1){
                     let arrayData=data.split(',');
@@ -135,6 +140,7 @@ export class TestPort extends EventEmitter{
                     this._readingSMS=false;
                     this._commandExec=Command.READ_SMS;
                     console.log("=============Finish========================")
+                    this.changeModeReceiveSMS();
                 }
                 else if(this._readingSMS){
                     //this.emit(this._functionCallBackReadSMS,{Data:data})
@@ -235,6 +241,11 @@ export class TestPort extends EventEmitter{
         this._commandExec=Command.CHECK_BALANCE;
         this._serialPort.write("AT+CUSD=1,\"*101#\"");
         this._serialPort.write('\r');
+    }
+    changeModeReceiveSMS():void{
+        this._serialPort.write(this.AT_CHANGE_MOD_RECEIVE_SMS);
+        this._serialPort.write('\r');
+        
     }
 
 

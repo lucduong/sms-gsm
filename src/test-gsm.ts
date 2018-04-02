@@ -18,8 +18,8 @@ testPort.open().then(()=>{
     //testPort.checkGsm();
     //testPort.sendSms(message);
     //testPort.deleteAllSMS();
-    testPort.readMessage();
-    
+    //testPort.readMessage();
+    testPort.changeModeReceiveSMS();
     //testPort.checkBalance();
     //testPort.getOperatorNetwork();
     //testPort.getPhoneNumber();
