@@ -38,7 +38,7 @@ var TestPort = (function (_super) {
         _this.AT_DELETE_ALLSMS = "AT+CMGD=1,4";
         _this.AT_GET_OPERATOR = "AT+COPS=?";
         _this.AT_GET_PHONE_NUMBER = "AT+CNUM";
-        _this.AT_CHANGE_MOD_RECEIVE_SMS = "AT+CNMI=2,1,0,0,0";
+        _this.AT_CHANGE_MOD_RECEIVE_SMS = "AT+CNMI=2,2,0,0,0";
         _this._regexGetBalanceVina = /[\d,]+\s/g;
         _this._regexGetBalanceVietnamemobile = /[\d,.]+\s?[dD]/g;
         _this._isOpen = false;
@@ -224,6 +224,10 @@ var TestPort = (function (_super) {
     TestPort.prototype.checkBalance = function () {
         this._commandExec = Command.CHECK_BALANCE;
         this._serialPort.write("AT+CUSD=1,\"*101#\"");
+        this._serialPort.write('\r');
+    };
+    TestPort.prototype.changeModeReceiveSMS = function () {
+        this._serialPort.write(this.AT_CHANGE_MOD_RECEIVE_SMS);
         this._serialPort.write('\r');
     };
     Object.defineProperty(TestPort.prototype, "functionCallBackSendSms", {

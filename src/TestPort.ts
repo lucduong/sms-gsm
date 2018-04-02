@@ -26,7 +26,7 @@ export class TestPort extends EventEmitter{
     private AT_DELETE_ALLSMS="AT+CMGD=1,4";
     private AT_GET_OPERATOR="AT+COPS=?";
     private AT_GET_PHONE_NUMBER="AT+CNUM";
-    private AT_CHANGE_MOD_RECEIVE_SMS="AT+CNMI=2,1,0,0,0";
+    private AT_CHANGE_MOD_RECEIVE_SMS="AT+CNMI=2,2,0,0,0";
     private _functionCallBackSendSms:string;
     private _functionCallBackCheckGSM:string;
     private _functionCallBackReadSMS:string;
@@ -242,11 +242,11 @@ export class TestPort extends EventEmitter{
         this._serialPort.write("AT+CUSD=1,\"*101#\"");
         this._serialPort.write('\r');
     }
-    // changeModeReceiveSMS():void{
-    //     this._serialPort.write(this.AT_CHANGE_MOD_RECEIVE_SMS);
-    //     this._serialPort.write('\r');
+    changeModeReceiveSMS():void{
+        this._serialPort.write(this.AT_CHANGE_MOD_RECEIVE_SMS);
+        this._serialPort.write('\r');
         
-    // }
+    }
 
 
     get functionCallBackSendSms(): string {
