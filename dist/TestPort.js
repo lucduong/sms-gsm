@@ -235,6 +235,7 @@ var TestPort = (function (_super) {
         this._serialPort.write('\r');
     };
     TestPort.prototype.deleteSMSIndex = function (index) {
+        this._commandExec = Command.DELETE_SMS_INDEX;
         this._serialPort.write(this.AT_DELETE_SMS_INDEX + index);
         this._serialPort.write('\r');
     };
@@ -298,6 +299,13 @@ var TestPort = (function (_super) {
         },
         set: function (val) {
             this._telco = val;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(TestPort.prototype, "port", {
+        get: function () {
+            return this._port;
         },
         enumerable: true,
         configurable: true

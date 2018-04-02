@@ -253,6 +253,7 @@ export class TestPort extends EventEmitter{
     }
 
     deleteSMSIndex(index:Number):void{
+        this._commandExec=Command.DELETE_SMS_INDEX;
         this._serialPort.write(this.AT_DELETE_SMS_INDEX+index);
         this._serialPort.write('\r');
     }
@@ -304,10 +305,14 @@ export class TestPort extends EventEmitter{
 
     get telco(): String {
         return this._telco;
-      }
-    
+    }
+       
     set telco(val: String) {
         this._telco = val;
+    }
+
+    get port(): String {
+        return this._port;
     }
 }
 
