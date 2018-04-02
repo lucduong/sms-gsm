@@ -12,9 +12,7 @@ const testPort=new TestPort("/dev/ttyUSB0");
 //     console.log("Check Gsm:"+data.Data)
 // })
 
-// testPort.on("listenCallBackReadSms",(data)=>{
-//     console.log("Read SMS: "+data.Data)
-// })
+
 
 // testPort.open().then(()=>{
 //     //testPort.checkGsm();
@@ -34,6 +32,10 @@ const testPort=new TestPort("/dev/ttyUSB0");
 // ];
 // var tmp=_.find(users, { 'age': 1, 'active': true });
 // console.log(tmp);
-
+testPort.functionCallBackReadSMS="listenCallBackReadSms";
 testPort.deleteAllSMS();
 testPort.readMessage();
+
+testPort.on("listenCallBackReadSms",(data)=>{
+    console.log("Read SMS: "+data.Data)
+})
