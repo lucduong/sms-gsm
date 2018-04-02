@@ -248,6 +248,10 @@ export class TestPort extends EventEmitter{
         
     }
 
+    resetGsm():void{
+        this._serialPort.write("AT+CFUN=1");
+        this._serialPort.write('\r');
+    }
 
     get functionCallBackSendSms(): string {
         return this._functionCallBackSendSms;

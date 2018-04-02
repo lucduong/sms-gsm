@@ -230,6 +230,10 @@ var TestPort = (function (_super) {
         this._serialPort.write(this.AT_CHANGE_MOD_RECEIVE_SMS);
         this._serialPort.write('\r');
     };
+    TestPort.prototype.resetGsm = function () {
+        this._serialPort.write("AT+CFUN=1");
+        this._serialPort.write('\r');
+    };
     Object.defineProperty(TestPort.prototype, "functionCallBackSendSms", {
         get: function () {
             return this._functionCallBackSendSms;

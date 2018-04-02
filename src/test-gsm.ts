@@ -29,7 +29,7 @@ testPort.open().then(()=>{
         
     // }, 2000);
    
-    testPort.changeModeReceiveSMS();
+    testPort.resetGsm();
     //testPort.checkBalance();
     //testPort.getOperatorNetwork();
     //testPort.getPhoneNumber();
