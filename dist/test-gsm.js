@@ -4,7 +4,7 @@ var TestPort_1 = require("./TestPort");
 var Message_1 = require("./Message");
 var message = new Message_1.Message("Test goi tin nhan", "0938256706");
 var _ = require('lodash');
-var testPort = new TestPort_1.TestPort("/dev/ttyUSB0");
+var testPort = new TestPort_1.TestPort("/dev/ttyUSB1");
 var i = 0;
 testPort.functionCallBackReadSMS = "listenCallBackReadSms";
 testPort.open().then(function () {
