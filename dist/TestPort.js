@@ -33,7 +33,7 @@ var TestPort = (function (_super) {
         _this.AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
         _this.AT_CHANGE_MOD_SMS = "AT+CMGF=1";
         _this.AT_SEND_SMS = "AT+CMGS=\"";
-        _this.AT_READ_UNREAD = "AT+CMGL=\"ALL\"";
+        _this.AT_READ_UNREAD = "AT+CMGL=\"REC UNREAD\"";
         _this.AT_DELETE_ALLSMS = "AT+CMGD=1,4";
         _this.AT_DELETE_SMS_INDEX = "AT+CMGD=";
         _this.AT_GET_OPERATOR = "AT+COPS=?";
@@ -152,6 +152,7 @@ var TestPort = (function (_super) {
             }
             else if (_this._commandExec === Command.DELETE_ALL_SMS) {
                 console.log(data);
+                _this.readMessage();
             }
         });
     };
