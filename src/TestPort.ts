@@ -148,7 +148,7 @@ export class TestPort extends EventEmitter{
                     console.log("=============Start body========================")
                     console.log("Noi dung tin nhan: "+data);
                     console.log("=============End Body========================")
-                    this._smsRead.smsContent=data;
+                    //this._smsRead.smsContent=data;
                 }
                
                 //this._commandExec=Command.READ_SMS;

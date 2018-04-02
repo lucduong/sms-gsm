@@ -147,7 +147,6 @@ var TestPort = (function (_super) {
                     console.log("=============Start body========================");
                     console.log("Noi dung tin nhan: " + data);
                     console.log("=============End Body========================");
-                    _this._smsRead.smsContent = data;
                 }
             }
             else if (_this._commandExec === Command.DELETE_ALL_SMS) {
