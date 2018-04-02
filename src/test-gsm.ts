@@ -16,10 +16,13 @@ testPort.functionCallBackReadSMS="listenCallBackReadSms";
 
 testPort.open().then(()=>{
     //testPort.checkGsm();
-    //testPort.sendSms(message);
+    testPort.sendSms(message);
     //testPort.deleteAllSMS();
-    //testPort.readMessage();
-    testPort.changeModeReceiveSMS();
+    setTimeout(function(){
+        testPort.readMessage();
+    }, 2000);
+   
+    //testPort.changeModeReceiveSMS();
     //testPort.checkBalance();
     //testPort.getOperatorNetwork();
     //testPort.getPhoneNumber();
