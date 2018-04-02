@@ -16,12 +16,13 @@ const pdu  = require("sms-pdu-node")
 export class TestPort extends EventEmitter{
     private _serialPort: SerialPort;
     private _isOpen: Boolean;
+    private _telco:String;
     private _parser:EventEmitter;
     private AT_CHECK = "AT+CPIN?";
     private AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
     private AT_CHANGE_MOD_SMS = "AT+CMGF=1";
     private AT_SEND_SMS = "AT+CMGS=\"";
-    private AT_READ_UNREAD="AT+CMGL=\"ALL\"";
+    private AT_READ_UNREAD="AT+CMGL=\"REC UNREAD\"";
     private AT_DELETE_ALLSMS="AT+CMGD=1,4";
     private AT_GET_OPERATOR="AT+COPS=?";
     private AT_GET_PHONE_NUMBER="AT+CNUM";
@@ -29,18 +30,18 @@ export class TestPort extends EventEmitter{
     private _functionCallBackCheckGSM:string;
     private _functionCallBackReadSMS:string;
     private _functionCallBackCheckBalance:string;
+    private _regexGetBalanceVina=/[\d,]+\s/g;
+    private _regexGetBalanceVietnamemobile=/[\d,.]+\s?[dD]/g;
     private _commandExec: Command;
     private _statusSendSMS: number;
     private _locked: Boolean;
     private _port: String;
     private _readingSMS:boolean;
-    constructor(port: String,functionCallBackSendSms:string,functionCallBackCheckGsm:string,functionCallBackreadSms:string){
+    private _phonenumberSend:string;
+    constructor(port: String){
         super();
         this._isOpen=false;
         this._port=port;
-        this._functionCallBackSendSms=functionCallBackSendSms;
-        this._functionCallBackCheckGSM=functionCallBackCheckGsm;
-        this._functionCallBackReadSMS=functionCallBackreadSms;
         this._serialPort = this.createNewSerialPort(this._port);
         this._parser=this._serialPort.pipe(new Readline({ delimiter: '\r\n' }));
         this.bindEnven();
@@ -72,7 +73,6 @@ export class TestPort extends EventEmitter{
             }
 
             if(this._commandExec===Command.SEND_SMS){
-               
                 if (data.indexOf("+CMGS:") !==-1 && this._statusSendSMS === 0) {
                     this._statusSendSMS = 1;
                 } else if (this._statusSendSMS === 1) {
@@ -80,15 +80,33 @@ export class TestPort extends EventEmitter{
                     this._locked = false;
                     this._commandExec=Command.READ_SMS;
                     if (data.indexOf("OK")!==-1&&data.length===2) {
-                        this.emit(this._functionCallBackSendSms,{status:true,port:this._port})
+                        this.emit(this._functionCallBackSendSms,{phonenumber:this._phonenumberSend,status:true,port:this._port})
                     }else{
-                        this.emit(this._functionCallBackSendSms,{status:false})
+                        this.emit(this._functionCallBackSendSms,{phonenumber:this._phonenumberSend,status:false,port:this._port})
                     }
+                    this.readMessage();
                 }
             }else if(this._commandExec===Command.CHECK){
                 this.emit(this._functionCallBackCheckGSM,{Data:data})
             }else if(this._commandExec===Command.CHECK_BALANCE){
-                console.log("Kiem tra TK: "+data);
+                let balance="";
+                if(this._telco.indexOf("vinaphone")!==-1){
+                    if(this._regexGetBalanceVina.test(data)){
+                        console.log("Kiem tra TK: "+data);
+                        balance=data.match(this._regexGetBalanceVina)[0];
+                        console.log("So tien trong TK: "+balance);
+                        this.readMessage();
+                    }
+                }else if(this._telco.indexOf("vietnamobile")!==-1){
+                    if(this._regexGetBalanceVietnamemobile.test(data)){
+                        console.log("Kiem tra TK: "+data);
+                        balance=data.match(this._regexGetBalanceVietnamemobile)[0];
+                        console.log("So tien trong TK: "+balance);
+                        this.readMessage();
+                    }
+                }
+                this.emit(this._functionCallBackCheckBalance,{balance:balance,port:this._port})
+                
             }else if(this._commandExec===Command.GET_OPERATOR){
                 console.log("Thông tin nhà mạng: "+data);
             }else if(this._commandExec===Command.READ_SMS){
@@ -152,6 +170,7 @@ export class TestPort extends EventEmitter{
         this._commandExec=Command.SEND_SMS;
         this._statusSendSMS=0;
         this._locked=true;
+        this._phonenumberSend=message.phoneNumber;
         const buffer = Buffer.from(message.smsContent);
         this._serialPort.write(this.AT_CHANGE_MOD_SMS);
         this._serialPort.write('\r');
@@ -188,8 +207,6 @@ export class TestPort extends EventEmitter{
         this._commandExec=Command.READ_SMS_INDEX;
         this._serialPort.write(`AT+CMGR=${index}`);
         this._serialPort.write('\r');
-      
-        
     }
 
     getOperatorNetwork():void{
@@ -247,6 +264,22 @@ export class TestPort extends EventEmitter{
     
     set functionCallBackCheckBalance(val: string) {
         this._functionCallBackCheckBalance = val;
+    }
+
+    get isOpen(): Boolean {
+        return this._isOpen;
+      }
+    
+    set isOpen(val: Boolean) {
+        this._isOpen = val;
+    }
+
+    get telco(): String {
+        return this._telco;
+      }
+    
+    set telco(val: String) {
+        this._telco = val;
     }
 }
 

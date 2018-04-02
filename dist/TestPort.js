@@ -33,7 +33,7 @@ var TestPort = (function (_super) {
         _this.AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
         _this.AT_CHANGE_MOD_SMS = "AT+CMGF=1";
         _this.AT_SEND_SMS = "AT+CMGS=\"";
-        _this.AT_READ_UNREAD = "AT+CMGL=\"ALL\"";
+        _this.AT_READ_UNREAD = "AT+CMGL=\"REC UNREAD\"";
         _this.AT_DELETE_ALLSMS = "AT+CMGD=1,4";
         _this.AT_GET_OPERATOR = "AT+COPS=?";
         _this.AT_GET_PHONE_NUMBER = "AT+CNUM";
@@ -80,11 +80,12 @@ var TestPort = (function (_super) {
                     _this._locked = false;
                     _this._commandExec = Command.READ_SMS;
                     if (data.indexOf("OK") !== -1 && data.length === 2) {
-                        _this.emit(_this._functionCallBackSendSms, { status: true, port: _this._port });
+                        _this.emit(_this._functionCallBackSendSms, { phonenumber: _this._phonenumberSend, status: true, port: _this._port });
                     }
                     else {
-                        _this.emit(_this._functionCallBackSendSms, { status: false, port: _this._port });
+                        _this.emit(_this._functionCallBackSendSms, { phonenumber: _this._phonenumberSend, status: false, port: _this._port });
                     }
+                    _this.readMessage();
                 }
             }
             else if (_this._commandExec === Command.CHECK) {
@@ -97,6 +98,7 @@ var TestPort = (function (_super) {
                         console.log("Kiem tra TK: " + data);
                         balance = data.match(_this._regexGetBalanceVina)[0];
                         console.log("So tien trong TK: " + balance);
+                        _this.readMessage();
                     }
                 }
                 else if (_this._telco.indexOf("vietnamobile") !== -1) {
@@ -104,6 +106,7 @@ var TestPort = (function (_super) {
                         console.log("Kiem tra TK: " + data);
                         balance = data.match(_this._regexGetBalanceVietnamemobile)[0];
                         console.log("So tien trong TK: " + balance);
+                        _this.readMessage();
                     }
                 }
                 _this.emit(_this._functionCallBackCheckBalance, { balance: balance, port: _this._port });
@@ -170,6 +173,7 @@ var TestPort = (function (_super) {
         this._commandExec = Command.SEND_SMS;
         this._statusSendSMS = 0;
         this._locked = true;
+        this._phonenumberSend = message.phoneNumber;
         var buffer = Buffer.from(message.smsContent);
         this._serialPort.write(this.AT_CHANGE_MOD_SMS);
         this._serialPort.write('\r');

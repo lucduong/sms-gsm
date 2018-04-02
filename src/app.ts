@@ -3,7 +3,7 @@ import {Message} from './Message';
 const express = require("express");
 const app = express();
 const bodyParser = require('body-parser');
-const testPort=new TestPort("/dev/ttyUSB0","listenCallback","listenCallBackCheckGsm","listenCallBackReadSms");
+const testPort=new TestPort("/dev/ttyUSB0");
 import * as database from './database.js';
 app.use(bodyParser.json())
 
