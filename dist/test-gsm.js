@@ -11,6 +11,9 @@ testPort.open().then(function () {
     testPort.deleteAllSMS();
 });
 testPort.on("listenCallBackReadSms", function (data) {
-    console.log("Read SMS: " + data.Data);
+    console.log("Read SMS: " + data);
+    if (data.indexSms) {
+        testPort.deleteSMSIndex(data.indexSms);
+    }
 });
 //# sourceMappingURL=test-gsm.js.map

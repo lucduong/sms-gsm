@@ -12,6 +12,7 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var SerialPort = require("serialport");
 var events_1 = require("events");
+var Message_1 = require("./Message");
 var Command;
 (function (Command) {
     Command[Command["CHECK"] = 1] = "CHECK";
@@ -22,6 +23,7 @@ var Command;
     Command[Command["CHECK_BALANCE"] = 6] = "CHECK_BALANCE";
     Command[Command["GET_OPERATOR"] = 7] = "GET_OPERATOR";
     Command[Command["GET_PHONE_NUMBER"] = 8] = "GET_PHONE_NUMBER";
+    Command[Command["DELETE_SMS_INDEX"] = 9] = "DELETE_SMS_INDEX";
 })(Command = exports.Command || (exports.Command = {}));
 var Readline = SerialPort.parsers.Readline;
 var pdu = require("sms-pdu-node");
@@ -136,9 +138,10 @@ var TestPort = (function (_super) {
                     console.log("So dien thoai: " + numberMobile);
                     console.log("=============End Header========================");
                     _this._readingSMS = true;
+                    _this._smsRead = new Message_1.Message("", numberMobile);
                 }
                 else if (data.indexOf("OK") !== -1 && data.length === 2) {
-                    _this.emit(_this._functionCallBackReadSMS, { data: _this._smsRead, port: _this._port });
+                    _this.emit(_this._functionCallBackReadSMS, { data: _this._smsRead, port: _this._port, indexSms: _this._indexReadSMS });
                     _this._readingSMS = false;
                     _this._commandExec = Command.READ_SMS;
                     console.log("=============Finish========================");
@@ -147,11 +150,17 @@ var TestPort = (function (_super) {
                     console.log("=============Start body========================");
                     console.log("Noi dung tin nhan: " + data);
                     console.log("=============End Body========================");
+                    _this._smsRead.smsContent = data;
                 }
             }
             else if (_this._commandExec === Command.DELETE_ALL_SMS) {
                 console.log(data);
                 _this.readMessage();
+            }
+            else if (_this._commandExec === Command.DELETE_SMS_INDEX) {
+                if (data.indexOf("OK") !== -1) {
+                    _this.readMessage();
+                }
             }
         });
     };
@@ -203,6 +212,7 @@ var TestPort = (function (_super) {
         this._commandExec = Command.READ_SMS_INDEX;
         this._serialPort.write("AT+CMGR=" + index);
         this._serialPort.write('\r');
+        this._indexReadSMS = index;
     };
     TestPort.prototype.getOperatorNetwork = function () {
         this._commandExec = Command.GET_OPERATOR;

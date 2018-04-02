@@ -10,6 +10,7 @@ export enum Command {
     CHECK_BALANCE=6,
     GET_OPERATOR=7,
     GET_PHONE_NUMBER=8,
+    DELETE_SMS_INDEX=9,
 }
 const Readline = SerialPort.parsers.Readline;
 const pdu  = require("sms-pdu-node")
@@ -41,6 +42,7 @@ export class TestPort extends EventEmitter{
     private _readingSMS:boolean;
     private _phonenumberSend:string;
     private _smsRead:Message;
+    private _indexReadSMS:Number;
     constructor(port: String){
         super();
         this._isOpen=false;
@@ -133,11 +135,11 @@ export class TestPort extends EventEmitter{
                     console.log(`So dien thoai: ${numberMobile}`)
                     console.log("=============End Header========================")
                     this._readingSMS=true;
-                    // this._smsRead=new Message("",numberMobile);
+                    this._smsRead=new Message("",numberMobile);
                     // this._smsRead.time=timeReceive;
                 }
                 else if(data.indexOf("OK")!==-1 && data.length===2){
-                    this.emit(this._functionCallBackReadSMS,{data:this._smsRead,port:this._port})
+                    this.emit(this._functionCallBackReadSMS,{data:this._smsRead,port:this._port,indexSms:this._indexReadSMS})
                     this._readingSMS=false;
                     this._commandExec=Command.READ_SMS;
                     console.log("=============Finish========================")
@@ -148,7 +150,7 @@ export class TestPort extends EventEmitter{
                     console.log("=============Start body========================")
                     console.log("Noi dung tin nhan: "+data);
                     console.log("=============End Body========================")
-                    //this._smsRead.smsContent=data;
+                    this._smsRead.smsContent=data;
                 }
                
                 //this._commandExec=Command.READ_SMS;
@@ -156,6 +158,10 @@ export class TestPort extends EventEmitter{
             else if(this._commandExec===Command.DELETE_ALL_SMS){
                 console.log(data);
                 this.readMessage();
+            }else if(this._commandExec===Command.DELETE_SMS_INDEX){
+                if(data.indexOf("OK")!==-1){
+                    this.readMessage();
+                }
             }
         });
     }
@@ -219,6 +225,7 @@ export class TestPort extends EventEmitter{
         this._commandExec=Command.READ_SMS_INDEX;
         this._serialPort.write(`AT+CMGR=${index}`);
         this._serialPort.write('\r');
+        this._indexReadSMS=index;
     }
 
     getOperatorNetwork():void{
