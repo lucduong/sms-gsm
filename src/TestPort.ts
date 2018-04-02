@@ -118,7 +118,7 @@ export class TestPort extends EventEmitter{
                     console.log("====================================================")
 
                 }else{
-                   this.changeModeReceiveSMS();
+                   //this.changeModeReceiveSMS();
                 }
                 
             }else if(this._commandExec===Command.READ_SMS_INDEX){
@@ -140,7 +140,7 @@ export class TestPort extends EventEmitter{
                     this._readingSMS=false;
                     this._commandExec=Command.READ_SMS;
                     console.log("=============Finish========================")
-                    this.changeModeReceiveSMS();
+                    //this.changeModeReceiveSMS();
                 }
                 else if(this._readingSMS){
                     //this.emit(this._functionCallBackReadSMS,{Data:data})
@@ -242,11 +242,11 @@ export class TestPort extends EventEmitter{
         this._serialPort.write("AT+CUSD=1,\"*101#\"");
         this._serialPort.write('\r');
     }
-    changeModeReceiveSMS():void{
-        this._serialPort.write(this.AT_CHANGE_MOD_RECEIVE_SMS);
-        this._serialPort.write('\r');
+    // changeModeReceiveSMS():void{
+    //     this._serialPort.write(this.AT_CHANGE_MOD_RECEIVE_SMS);
+    //     this._serialPort.write('\r');
         
-    }
+    // }
 
 
     get functionCallBackSendSms(): string {

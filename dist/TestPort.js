@@ -123,7 +123,6 @@ var TestPort = (function (_super) {
                     console.log("====================================================");
                 }
                 else {
-                    _this.changeModeReceiveSMS();
                 }
             }
             else if (_this._commandExec === Command.READ_SMS_INDEX) {
@@ -145,7 +144,6 @@ var TestPort = (function (_super) {
                     _this._readingSMS = false;
                     _this._commandExec = Command.READ_SMS;
                     console.log("=============Finish========================");
-                    _this.changeModeReceiveSMS();
                 }
                 else if (_this._readingSMS) {
                     console.log("=============Start body========================");
@@ -226,10 +224,6 @@ var TestPort = (function (_super) {
     TestPort.prototype.checkBalance = function () {
         this._commandExec = Command.CHECK_BALANCE;
         this._serialPort.write("AT+CUSD=1,\"*101#\"");
-        this._serialPort.write('\r');
-    };
-    TestPort.prototype.changeModeReceiveSMS = function () {
-        this._serialPort.write(this.AT_CHANGE_MOD_RECEIVE_SMS);
         this._serialPort.write('\r');
     };
     Object.defineProperty(TestPort.prototype, "functionCallBackSendSms", {

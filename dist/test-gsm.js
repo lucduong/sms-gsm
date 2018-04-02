@@ -9,15 +9,6 @@ var i = 0;
 testPort.functionCallBackReadSMS = "listenCallBackReadSms";
 testPort.open().then(function () {
     testPort.sendSms(message);
-    setTimeout(function () {
-        if (i === 0) {
-            testPort.readMessage();
-            i++;
-        }
-        else {
-            return;
-        }
-    }, 2000);
 });
 testPort.on("listenCallBackReadSms", function (data) {
     console.log("Read SMS: " + data.Data);

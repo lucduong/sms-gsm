@@ -19,15 +19,15 @@ testPort.open().then(()=>{
     //testPort.checkGsm();
     testPort.sendSms(message);
     //testPort.deleteAllSMS();
-    setTimeout(function(){
-        if(i===0){
-            testPort.readMessage();
-            i++;
-        }else{
-            return;
-        }
+    // setTimeout(function(){
+    //     if(i===0){
+    //         testPort.readMessage();
+    //         i++;
+    //     }else{
+    //         return;
+    //     }
         
-    }, 2000);
+    // }, 2000);
    
     //testPort.changeModeReceiveSMS();
     //testPort.checkBalance();
