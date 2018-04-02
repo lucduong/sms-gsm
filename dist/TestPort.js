@@ -36,6 +36,7 @@ var TestPort = (function (_super) {
         _this.AT_SEND_SMS = "AT+CMGS=\"";
         _this.AT_READ_UNREAD = "AT+CMGL=\"ALL\"";
         _this.AT_DELETE_ALLSMS = "AT+CMGD=1,4";
+        _this.AT_DELETE_SMS_INDEX = "AT+CMGD=";
         _this.AT_GET_OPERATOR = "AT+COPS=?";
         _this.AT_GET_PHONE_NUMBER = "AT+CNUM";
         _this.AT_CHANGE_MOD_RECEIVE_SMS = "AT+CNMI=2,2,0,0,0";
@@ -226,8 +227,8 @@ var TestPort = (function (_super) {
         this._serialPort.write("AT+CUSD=1,\"*101#\"");
         this._serialPort.write('\r');
     };
-    TestPort.prototype.changeModeReceiveSMS = function () {
-        this._serialPort.write(this.AT_CHANGE_MOD_RECEIVE_SMS);
+    TestPort.prototype.deleteSMSIndex = function (index) {
+        this._serialPort.write(this.AT_DELETE_SMS_INDEX + index);
         this._serialPort.write('\r');
     };
     TestPort.prototype.resetGsm = function () {
