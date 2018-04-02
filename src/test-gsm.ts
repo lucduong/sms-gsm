@@ -28,8 +28,8 @@ testPort.open().then(()=>{
     //     }
         
     // }, 2000);
-    testPort.deleteSMSIndex(10);
-    //testPort.readMessage();
+    //testPort.deleteSMSIndex(10);
+    testPort.readMessage();
     //testPort.resetGsm();
     //testPort.checkBalance();
     //testPort.getOperatorNetwork();
