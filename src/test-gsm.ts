@@ -5,6 +5,7 @@ const _ = require('lodash');
 const testPort=new TestPort("/dev/ttyUSB0");
 let i=0;
 testPort.functionCallBackReadSMS="listenCallBackReadSms";
+testPort.telco="vinaphone";
 // testPort.on("listenCallback",(Data)=>{
 //     console.log(Data)
 // })

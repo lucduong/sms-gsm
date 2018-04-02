@@ -7,6 +7,7 @@ var _ = require('lodash');
 var testPort = new TestPort_1.TestPort("/dev/ttyUSB0");
 var i = 0;
 testPort.functionCallBackReadSMS = "listenCallBackReadSms";
+testPort.telco = "vinaphone";
 testPort.open().then(function () {
     testPort.checkBalance();
 });
