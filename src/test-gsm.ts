@@ -17,7 +17,7 @@ testPort.functionCallBackReadSMS="listenCallBackReadSms";
 testPort.open().then(()=>{
     //testPort.checkGsm();
     //testPort.sendSms(message);
-    //testPort.deleteAllSMS();
+    testPort.deleteAllSMS();
     testPort.readMessage();
     
     //testPort.checkBalance();

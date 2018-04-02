@@ -22,7 +22,7 @@ export class TestPort extends EventEmitter{
     private AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
     private AT_CHANGE_MOD_SMS = "AT+CMGF=1";
     private AT_SEND_SMS = "AT+CMGS=\"";
-    private AT_READ_UNREAD="AT+CMGL=\"REC UNREAD\"";
+    private AT_READ_UNREAD="AT+CMGL=\"ALL\"";
     private AT_DELETE_ALLSMS="AT+CMGD=1,4";
     private AT_GET_OPERATOR="AT+COPS=?";
     private AT_GET_PHONE_NUMBER="AT+CNUM";
@@ -38,6 +38,7 @@ export class TestPort extends EventEmitter{
     private _port: String;
     private _readingSMS:boolean;
     private _phonenumberSend:string;
+    private _smsRead:Message;
     constructor(port: String){
         super();
         this._isOpen=false;
@@ -119,16 +120,18 @@ export class TestPort extends EventEmitter{
                 if(data.indexOf("+CMGR:")!==-1){
                     let arrayData=data.split(',');
                     let command=arrayData[0];//Lệnh thực thi
-                    let statusSMS=arrayData[1];//Tình trạng tin nhắn
-                    let numberMobile=arrayData[2];//Số điện thoại
-                    let dateReceive=arrayData[4];//Ngày nhận
-                    let timeReceive=arrayData[5];//Ngày nhận
+                    let numberMobile=arrayData[1];//Số điện thoại
+                    let dateReceive=arrayData[2];//Ngày nhận
+                    let timeReceive=arrayData[4];//Ngày nhận
                     console.log("=============Header========================")
                     console.log(`So dien thoai: ${numberMobile}`)
                     console.log("=============End Header========================")
                     this._readingSMS=true;
+                    this._smsRead=new Message("",numberMobile);
+                    this._smsRead.time=timeReceive;
                 }
                 else if(data.indexOf("OK")!==-1 && data.length===2){
+                    this.emit(this._functionCallBackReadSMS,{data:this._smsRead,port:this._port})
                     this._readingSMS=false;
                     this._commandExec=Command.READ_SMS;
                     console.log("=============Finish========================")
@@ -138,6 +141,7 @@ export class TestPort extends EventEmitter{
                     console.log("=============Start body========================")
                     console.log("Noi dung tin nhan: "+data);
                     console.log("=============End Body========================")
+                    this._smsRead.smsContent=data;
                 }
                
                 //this._commandExec=Command.READ_SMS;

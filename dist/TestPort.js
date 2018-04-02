@@ -12,6 +12,7 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var SerialPort = require("serialport");
 var events_1 = require("events");
+var Message_1 = require("./Message");
 var Command;
 (function (Command) {
     Command[Command["CHECK"] = 1] = "CHECK";
@@ -33,7 +34,7 @@ var TestPort = (function (_super) {
         _this.AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
         _this.AT_CHANGE_MOD_SMS = "AT+CMGF=1";
         _this.AT_SEND_SMS = "AT+CMGS=\"";
-        _this.AT_READ_UNREAD = "AT+CMGL=\"REC UNREAD\"";
+        _this.AT_READ_UNREAD = "AT+CMGL=\"ALL\"";
         _this.AT_DELETE_ALLSMS = "AT+CMGD=1,4";
         _this.AT_GET_OPERATOR = "AT+COPS=?";
         _this.AT_GET_PHONE_NUMBER = "AT+CNUM";
@@ -125,16 +126,18 @@ var TestPort = (function (_super) {
                 if (data.indexOf("+CMGR:") !== -1) {
                     var arrayData = data.split(',');
                     var command = arrayData[0];
-                    var statusSMS = arrayData[1];
-                    var numberMobile = arrayData[2];
-                    var dateReceive = arrayData[4];
-                    var timeReceive = arrayData[5];
+                    var numberMobile = arrayData[1];
+                    var dateReceive = arrayData[2];
+                    var timeReceive = arrayData[4];
                     console.log("=============Header========================");
                     console.log("So dien thoai: " + numberMobile);
                     console.log("=============End Header========================");
                     _this._readingSMS = true;
+                    _this._smsRead = new Message_1.Message("", numberMobile);
+                    _this._smsRead.time = timeReceive;
                 }
                 else if (data.indexOf("OK") !== -1 && data.length === 2) {
+                    _this.emit(_this._functionCallBackReadSMS, { data: _this._smsRead, port: _this._port });
                     _this._readingSMS = false;
                     _this._commandExec = Command.READ_SMS;
                     console.log("=============Finish========================");
@@ -143,6 +146,7 @@ var TestPort = (function (_super) {
                     console.log("=============Start body========================");
                     console.log("Noi dung tin nhan: " + data);
                     console.log("=============End Body========================");
+                    _this._smsRead.smsContent = data;
                 }
             }
             else if (_this._commandExec === Command.DELETE_ALL_SMS) {

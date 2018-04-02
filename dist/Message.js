@@ -9,12 +9,28 @@ var Message = (function () {
         get: function () {
             return this._smsContent;
         },
+        set: function (val) {
+            this._smsContent = val;
+        },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(Message.prototype, "phoneNumber", {
         get: function () {
             return this._phoneNumber;
+        },
+        set: function (val) {
+            this._phoneNumber = val;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Message.prototype, "time", {
+        get: function () {
+            return this._time;
+        },
+        set: function (val) {
+            this.time = val;
         },
         enumerable: true,
         configurable: true
