@@ -28,8 +28,8 @@ testPort.open().then(()=>{
     //     }
         
     // }, 2000);
-   
-    testPort.resetGsm();
+    testPort.readMessage();
+    //testPort.resetGsm();
     //testPort.checkBalance();
     //testPort.getOperatorNetwork();
     //testPort.getPhoneNumber();
