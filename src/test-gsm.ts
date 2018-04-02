@@ -3,7 +3,7 @@ import {Message} from './Message';
 const message=new Message("Test goi tin nhan","0938256706");
 const _ = require('lodash');
 const testPort=new TestPort("/dev/ttyUSB0");
-
+testPort.functionCallBackReadSMS="listenCallBackReadSms";
 // testPort.on("listenCallback",(Data)=>{
 //     console.log(Data)
 // })
@@ -14,16 +14,16 @@ const testPort=new TestPort("/dev/ttyUSB0");
 
 
 
-// testPort.open().then(()=>{
-//     //testPort.checkGsm();
-//     testPort.sendSms(message);
+testPort.open().then(()=>{
+    //testPort.checkGsm();
+    //testPort.sendSms(message);
+    testPort.deleteAllSMS();
+    testPort.readMessage();
     
-//     //testPort.readMessage();
-//     //testPort.deleteAllSMS()
-//     //testPort.checkBalance();
-//     //testPort.getOperatorNetwork();
-//     //testPort.getPhoneNumber();
-// })
+    //testPort.checkBalance();
+    //testPort.getOperatorNetwork();
+    //testPort.getPhoneNumber();
+})
 
 // var users = [
 //     { 'user': 'barney',  'age': 36, 'active': true },
@@ -32,9 +32,9 @@ const testPort=new TestPort("/dev/ttyUSB0");
 // ];
 // var tmp=_.find(users, { 'age': 1, 'active': true });
 // console.log(tmp);
-testPort.functionCallBackReadSMS="listenCallBackReadSms";
-testPort.deleteAllSMS();
-testPort.readMessage();
+
+// testPort.deleteAllSMS();
+// testPort.readMessage();
 
 testPort.on("listenCallBackReadSms",(data)=>{
     console.log("Read SMS: "+data.Data)
