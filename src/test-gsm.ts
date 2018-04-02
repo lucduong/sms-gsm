@@ -1,6 +1,6 @@
 import {TestPort} from './TestPort';
 import {Message} from './Message';
-const message=new Message("Test goi tin nhan","0938256706");
+const message=new Message("Test goi tin nhan","+84938256706");
 const _ = require('lodash');
 const testPort=new TestPort("/dev/ttyUSB0");
 let i=0;
