@@ -12,7 +12,6 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var SerialPort = require("serialport");
 var events_1 = require("events");
-var Message_1 = require("./Message");
 var Command;
 (function (Command) {
     Command[Command["CHECK"] = 1] = "CHECK";
@@ -137,8 +136,6 @@ var TestPort = (function (_super) {
                     console.log("So dien thoai: " + numberMobile);
                     console.log("=============End Header========================");
                     _this._readingSMS = true;
-                    _this._smsRead = new Message_1.Message("", numberMobile);
-                    _this._smsRead.time = timeReceive;
                 }
                 else if (data.indexOf("OK") !== -1 && data.length === 2) {
                     _this.emit(_this._functionCallBackReadSMS, { data: _this._smsRead, port: _this._port });

@@ -133,8 +133,8 @@ export class TestPort extends EventEmitter{
                     console.log(`So dien thoai: ${numberMobile}`)
                     console.log("=============End Header========================")
                     this._readingSMS=true;
-                    this._smsRead=new Message("",numberMobile);
-                    this._smsRead.time=timeReceive;
+                    // this._smsRead=new Message("",numberMobile);
+                    // this._smsRead.time=timeReceive;
                 }
                 else if(data.indexOf("OK")!==-1 && data.length===2){
                     this.emit(this._functionCallBackReadSMS,{data:this._smsRead,port:this._port})
