@@ -13,6 +13,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var SerialPort = require("serialport");
 var events_1 = require("events");
 var Message_1 = require("./Message");
+var convertPdu_1 = require("./convertPdu");
 var Command;
 (function (Command) {
     Command[Command["CHECK"] = 1] = "CHECK";
@@ -31,11 +32,15 @@ var TestPort = (function (_super) {
     __extends(TestPort, _super);
     function TestPort(port) {
         var _this = _super.call(this) || this;
+        _this.SMSC_VIETTEL = "+84980200030";
+        _this.SMSC_VINA = "+8491020005";
+        _this.SMSC_MOBILE = "+84900000023";
+        _this.SMSC_VIETNAMOBILE = "+84920210015";
         _this.AT_CHECK = "AT+CPIN?";
         _this.AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
-        _this.AT_CHANGE_MOD_SMS = "AT+CMGF=1";
+        _this.AT_CHANGE_MOD_SMS = "AT+CMGF=0";
         _this.AT_SEND_SMS = "AT+CMGS=\"";
-        _this.AT_READ_UNREAD = "AT+CMGL=\"REC UNREAD\"";
+        _this.AT_READ_UNREAD = "AT+CMGL=1";
         _this.AT_DELETE_ALLSMS = "AT+CMGD=1,4";
         _this.AT_DELETE_SMS_INDEX = "AT+CMGD=";
         _this.AT_GET_OPERATOR = "AT+COPS=?";
@@ -43,6 +48,7 @@ var TestPort = (function (_super) {
         _this.AT_CHANGE_MOD_RECEIVE_SMS = "AT+CNMI=2,2,0,0,0";
         _this._regexGetBalanceVina = /[\d,]+\s/g;
         _this._regexGetBalanceVietnamemobile = /[\d,.]+\s?[dD]/g;
+        _this._convertPdu = new convertPdu_1.ConvertPDU();
         _this._isOpen = false;
         _this._port = port;
         _this._serialPort = _this.createNewSerialPort(_this._port);
@@ -66,7 +72,7 @@ var TestPort = (function (_super) {
             console.log("Open port sucessful");
         });
         this._parser.on('data', function (data) {
-            console.log(data);
+            console.log("Port " + _this._port + ": " + data);
             if (data.indexOf("+CMTI:") !== -1) {
                 var array = data.split(',');
                 var indexSMS = array[1];
@@ -129,28 +135,19 @@ var TestPort = (function (_super) {
             }
             else if (_this._commandExec === Command.READ_SMS_INDEX) {
                 if (data.indexOf("+CMGR:") !== -1) {
-                    var arrayData = data.split(',');
-                    var command = arrayData[0];
-                    var numberMobile = arrayData[1];
-                    var dateReceive = arrayData[2];
-                    var timeReceive = arrayData[4];
-                    console.log("=============Header========================");
-                    console.log("So dien thoai: " + numberMobile);
-                    console.log("=============End Header========================");
+                    console.log("==================Header========================");
                     _this._readingSMS = true;
-                    _this._smsRead = new Message_1.Message("", numberMobile);
+                    console.log(data);
                 }
                 else if (data.indexOf("OK") !== -1 && data.length === 2) {
-                    _this.emit(_this._functionCallBackReadSMS, { data: _this._smsRead, port: _this._port, indexSms: _this._indexReadSMS });
                     _this._readingSMS = false;
-                    _this._commandExec = Command.READ_SMS;
-                    console.log("=============Finish========================");
+                    _this.emit(_this._functionCallBackReadSMS, { data: _this._smsRead, port: _this._port, indexSms: _this._indexReadSMS });
                 }
                 else if (_this._readingSMS) {
-                    console.log("=============Start body========================");
-                    console.log("Noi dung tin nhan: " + data);
-                    console.log("=============End Body========================");
-                    _this._smsRead.smsContent = data;
+                    console.log("==================Body========================");
+                    var tmpDatParePdu = _this._convertPdu.getPDUMetaInfo(data);
+                    _this._smsRead = new Message_1.Message(tmpDatParePdu.message, tmpDatParePdu.sender);
+                    console.log("Body: " + data);
                 }
             }
             else if (_this._commandExec === Command.DELETE_ALL_SMS) {
@@ -188,14 +185,24 @@ var TestPort = (function (_super) {
         this._statusSendSMS = 0;
         this._locked = true;
         this._phonenumberSend = message.phoneNumber;
-        var buffer = Buffer.from(message.smsContent);
+        var dataPDU;
+        if (this._telco.toLowerCase() == "vinaphone") {
+            dataPDU = this._convertPdu.stringToPDU(message.smsContent, this._phonenumberSend, this.SMSC_VINA, 16);
+        }
+        else if (this._telco.toLowerCase() == "viettel") {
+            dataPDU = this._convertPdu.stringToPDU(message.smsContent, this._phonenumberSend, this.SMSC_VIETTEL, 16);
+        }
+        else if (this._telco.toLowerCase() == "mobilephone") {
+            dataPDU = this._convertPdu.stringToPDU(message.smsContent, this._phonenumberSend, this.SMSC_MOBILE, 16);
+        }
+        else {
+            dataPDU = this._convertPdu.stringToPDU(message.smsContent, this._phonenumberSend, this.SMSC_VIETNAMOBILE, 16);
+        }
         this._serialPort.write(this.AT_CHANGE_MOD_SMS);
         this._serialPort.write('\r');
-        this._serialPort.write(this.AT_SEND_SMS);
-        this._serialPort.write(message.phoneNumber);
-        this._serialPort.write('"');
+        this._serialPort.write("AT+CMGS=" + dataPDU.length);
         this._serialPort.write('\r');
-        this._serialPort.write(buffer);
+        this._serialPort.write(dataPDU.pduData);
         this._serialPort.write(new Buffer([0x1A]));
         this._serialPort.write('^z');
     };
@@ -210,7 +217,7 @@ var TestPort = (function (_super) {
     };
     TestPort.prototype.readSMSByIndex = function (index) {
         this._commandExec = Command.READ_SMS_INDEX;
-        this._serialPort.write("AT+CMGR=" + index);
+        this._serialPort.write("AT+CMGF=0 ;+CMGR=" + index);
         this._serialPort.write('\r');
         this._indexReadSMS = index;
     };

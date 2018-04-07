@@ -1,6 +1,7 @@
 import * as SerialPort from 'serialport';
 import { EventEmitter } from 'events';
 import { Message } from './Message';
+import {ConvertPDU} from './convertPdu';
 export enum Command {
     CHECK = 1,
     SEND_SMS = 2,
@@ -19,11 +20,15 @@ export class TestPort extends EventEmitter{
     private _isOpen: Boolean;
     private _telco:String;
     private _parser:EventEmitter;
+    private SMSC_VIETTEL="+84980200030";
+    private SMSC_VINA="+8491020005";
+    private SMSC_MOBILE="+84900000023";
+    private SMSC_VIETNAMOBILE="+84920210015";
     private AT_CHECK = "AT+CPIN?";
     private AT_CHECK_SUPPORT_SENDSMS = "AT+CMGF?";
-    private AT_CHANGE_MOD_SMS = "AT+CMGF=1";
+    private AT_CHANGE_MOD_SMS = "AT+CMGF=0";
     private AT_SEND_SMS = "AT+CMGS=\"";
-    private AT_READ_UNREAD="AT+CMGL=\"REC UNREAD\"";
+    private AT_READ_UNREAD="AT+CMGL=1";
     private AT_DELETE_ALLSMS="AT+CMGD=1,4";
     private AT_DELETE_SMS_INDEX="AT+CMGD=";
     private AT_GET_OPERATOR="AT+COPS=?";
@@ -35,6 +40,7 @@ export class TestPort extends EventEmitter{
     private _functionCallBackCheckBalance:string;
     private _regexGetBalanceVina=/[\d,]+\s/g;
     private _regexGetBalanceVietnamemobile=/[\d,.]+\s?[dD]/g;
+    private _regexRemoveSpecialCharacter=/[^\w\s]/gi;
     private _commandExec: Command;
     private _statusSendSMS: number;
     private _locked: Boolean;
@@ -43,8 +49,10 @@ export class TestPort extends EventEmitter{
     private _phonenumberSend:string;
     private _smsRead:Message;
     private _indexReadSMS:Number;
+    private _convertPdu:ConvertPDU;
     constructor(port: String){
         super();
+        this._convertPdu=new ConvertPDU();
         this._isOpen=false;
         this._port=port;
         this._serialPort = this.createNewSerialPort(this._port);
@@ -67,7 +75,7 @@ export class TestPort extends EventEmitter{
             console.log("Open port sucessful");
         });
         this._parser.on('data',data => {
-            console.log(data);
+            console.log(`Port ${this._port}: `+data);
             if(data.indexOf("+CMTI:")!==-1){ //Có tin nhắn tới
                 let array = data.split(',');
                 let indexSMS=array[1];
@@ -95,10 +103,11 @@ export class TestPort extends EventEmitter{
                 this.emit(this._functionCallBackCheckGSM,{Data:data})
             }else if(this._commandExec===Command.CHECK_BALANCE){
                 let balance="";
-                if(this._telco.indexOf("vinaphone")!==-1){
+                if(this._telco.indexOf("vinaphone")!==-1||this._telco.indexOf("mobilephone")!==-1){
                     if(this._regexGetBalanceVina.test(data)){
                         console.log("Kiem tra TK: "+data);
                         balance=data.match(this._regexGetBalanceVina)[0];
+                        balance=balance.replace(this._regexRemoveSpecialCharacter,'');//remove special chracter
                         console.log("So tien trong TK: "+balance);
                         this.readMessage();
                     }
@@ -106,6 +115,7 @@ export class TestPort extends EventEmitter{
                     if(this._regexGetBalanceVietnamemobile.test(data)){
                         console.log("Kiem tra TK: "+data);
                         balance=data.match(this._regexGetBalanceVietnamemobile)[0];
+                        balance=balance.replace(this._regexRemoveSpecialCharacter,'');//remove special chracter
                         console.log("So tien trong TK: "+balance);
                         this.readMessage();
                     }
@@ -126,34 +136,22 @@ export class TestPort extends EventEmitter{
                 
             }else if(this._commandExec===Command.READ_SMS_INDEX){
                 if(data.indexOf("+CMGR:")!==-1){
-                    let arrayData=data.split(',');
-                    let command=arrayData[0];//Lệnh thực thi
-                    let numberMobile=arrayData[1];//Số điện thoại
-                    let dateReceive=arrayData[2];//Ngày nhận
-                    let timeReceive=arrayData[4];//Ngày nhận
-                    console.log("=============Header========================")
-                    console.log(`So dien thoai: ${numberMobile}`)
-                    console.log("=============End Header========================")
+                    console.log("==================Header========================");
                     this._readingSMS=true;
-                    this._smsRead=new Message("",numberMobile);
-                    // this._smsRead.time=timeReceive;
+                    console.log(data);
                 }
                 else if(data.indexOf("OK")!==-1 && data.length===2){
-                    this.emit(this._functionCallBackReadSMS,{data:this._smsRead,port:this._port,indexSms:this._indexReadSMS})
                     this._readingSMS=false;
-                    this._commandExec=Command.READ_SMS;
-                    console.log("=============Finish========================")
-                    //this.changeModeReceiveSMS();
+                    this.emit(this._functionCallBackReadSMS,{data:this._smsRead,port:this._port,indexSms:this._indexReadSMS})
                 }
                 else if(this._readingSMS){
-                    //this.emit(this._functionCallBackReadSMS,{Data:data})
-                    console.log("=============Start body========================")
-                    console.log("Noi dung tin nhan: "+data);
-                    console.log("=============End Body========================")
-                    this._smsRead.smsContent=data;
+                    console.log("==================Body========================");
+                    let tmpDatParePdu=this._convertPdu.getPDUMetaInfo(data);
+                    this._smsRead=new Message(tmpDatParePdu.message,tmpDatParePdu.sender);
+                    console.log("Body: "+data);
+                   
                 }
-               
-                //this._commandExec=Command.READ_SMS;
+                
             }
             else if(this._commandExec===Command.DELETE_ALL_SMS){
                 console.log(data);
@@ -189,26 +187,37 @@ export class TestPort extends EventEmitter{
         this._statusSendSMS=0;
         this._locked=true;
         this._phonenumberSend=message.phoneNumber;
-        const buffer = Buffer.from(message.smsContent);
-        this._serialPort.write(this.AT_CHANGE_MOD_SMS);
-        this._serialPort.write('\r');
-        this._serialPort.write(this.AT_SEND_SMS);
-        this._serialPort.write(message.phoneNumber);
-        this._serialPort.write('"')
-        this._serialPort.write('\r');
-        this._serialPort.write(buffer);
-        this._serialPort.write(new Buffer([0x1A]));
-        this._serialPort.write('^z');
-       
-        
-        // const dataPdu=pdu(message.smsContent, message.phoneNumber, null, 16);
-        // console.log("Data sau khi convert: "+dataPdu.pdu);
+        let dataPDU;
+        if(this._telco.toLowerCase()=="vinaphone"){
+            dataPDU=this._convertPdu.stringToPDU(message.smsContent,this._phonenumberSend,this.SMSC_VINA,16);
+        }
+        else if(this._telco.toLowerCase()=="viettel"){
+            dataPDU=this._convertPdu.stringToPDU(message.smsContent,this._phonenumberSend,this.SMSC_VIETTEL,16);
+        }
+        else if(this._telco.toLowerCase()=="mobilephone"){
+            dataPDU=this._convertPdu.stringToPDU(message.smsContent,this._phonenumberSend,this.SMSC_MOBILE,16);
+        }else{
+            dataPDU=this._convertPdu.stringToPDU(message.smsContent,this._phonenumberSend,this.SMSC_VIETNAMOBILE,16);
+        }
+
+        // const buffer = Buffer.from(message.smsContent);
         // this._serialPort.write(this.AT_CHANGE_MOD_SMS);
         // this._serialPort.write('\r');
-        // this._serialPort.write(dataPdu.command);
+        // this._serialPort.write(this.AT_SEND_SMS);
+        // this._serialPort.write(message.phoneNumber);
+        // this._serialPort.write('"')
         // this._serialPort.write('\r');
-        // this._serialPort.write(dataPdu.pdu);
+        // this._serialPort.write(buffer);
+        // this._serialPort.write(new Buffer([0x1A]));
         // this._serialPort.write('^z');
+       
+        this._serialPort.write(this.AT_CHANGE_MOD_SMS);
+        this._serialPort.write('\r');
+        this._serialPort.write(`AT+CMGS=${dataPDU.length}`);
+        this._serialPort.write('\r');
+        this._serialPort.write(dataPDU.pduData);
+        this._serialPort.write(new Buffer([0x1A]));
+        this._serialPort.write('^z');
     }
     checkModeGSM():void{
         this._serialPort.write('AT+CMGF?');
@@ -223,7 +232,8 @@ export class TestPort extends EventEmitter{
 
     readSMSByIndex(index:number):void{
         this._commandExec=Command.READ_SMS_INDEX;
-        this._serialPort.write(`AT+CMGR=${index}`);
+        this._serialPort.write(`AT+CMGF=0 ;+CMGR=${index}`);
+        //this._serialPort.write(`AT+CMGR=${index}`);
         this._serialPort.write('\r');
         this._indexReadSMS=index;
     }
@@ -262,6 +272,8 @@ export class TestPort extends EventEmitter{
         this._serialPort.write("AT+CFUN=1");
         this._serialPort.write('\r');
     }
+
+   
 
     get functionCallBackSendSms(): string {
         return this._functionCallBackSendSms;
