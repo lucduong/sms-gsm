@@ -4,15 +4,61 @@ import {Message} from './Message';
 const message=new Message("Test gởi tin nhắn chúa ký tự","+84938256706");
 const _ = require('lodash');
 const SerialPort = require('serialport');
-const testPort=new TestPort("COM12");
+const testPort=new TestPort("/dev/ttyUSB15");
+const testPort1=new TestPort("/dev/ttyUSB14");
 const convertPDU=new ConvertPDU();
 let i=0;
 const listPort=[];
+
 testPort.functionCallBackReadSMS="listenCallBackReadSms";
 testPort.telco="viettel";
-// testPort.on("listenCallback",(Data)=>{
-//     console.log(Data)
-// })
+testPort.functionCallBackCheckGSM="listenCallBackCheckGSM"
+testPort.functionCallBackGetOperation="listenCallBackGetOperation";
+testPort1.functionCallBackCheckGSM="listenCallBackCheckGSM"
+testPort1.functionCallBackGetOperation="listenCallBackGetOperation";
+testPort.on("listenCallBackCheckGSM",(Data)=>{
+    console.log(Data)
+})
+testPort.on("listenCallBackGetOperation",(Data)=>{
+    console.log(Data)
+})
+
+testPort1.on("listenCallBackCheckGSM",(Data)=>{
+    console.log(Data)
+})
+testPort1.on("listenCallBackGetOperation",(Data)=>{
+    console.log(Data)
+})
+
+testPort.open().then(()=>{
+    testPort.checkGsm();
+   
+    if(testPort.isLock){
+       testPort.addTask({ action: testPort.getOperatorNetwork, params: { } });
+    }else{
+        //testPort.getOperatorNetwork();
+    }
+})
+
+testPort1.open().then(()=>{
+    testPort1.checkGsm();
+    testPort1.addTask({action:testPort1.getOperatorNetwork,params:{}})
+})
+
+
+
+
+// let pduData=convertPDU.stringToPDU("Tin nhắn chứa ký tự","+84938256706","+84980200030",16)
+// console.log(pduData);
+// let convertPdutoText=convertPDU.getPDUMetaInfo(pduData.pduData);
+// console.log(convertPdutoText);
+testPort.on("listenCallBackReadSms",(data)=>{
+    console.log("Read SMS: "+data.data.smsContent)
+    if(data.indexSms){
+        testPort.deleteSMSIndex(data.indexSms);
+    }
+})
+
 
 // testPort.on("listenCallBackCheckGsm",(data)=>{
 //     console.log("Check Gsm:"+data.Data)
@@ -38,50 +84,3 @@ testPort.telco="viettel";
 //         testPort.checkGsm();
 //     })
 // })
-
- testPort.open().then(()=>{
-     //testPort.checkGsm();
-    //testPort.sendSms(message);
-    //testPort.deleteAllSMS();
-    // setTimeout(function(){
-    //     if(i===0){
-    //         testPort.readMessage();
-    //         i++;
-    //     }else{
-    //         return;
-    //     }
-        
-    // }, 2000);
-    //testPort.deleteSMSIndex(10);
-    testPort.readMessage();
-    //testPort.resetGsm();
-    //testPort.checkBalance();
-    //testPort.getOperatorNetwork();
-    //testPort.getPhoneNumber();
-    //testPort.readSMSByIndex(0);
- })
-
-// var users = [
-//     { 'user': 'barney',  'age': 36, 'active': true },
-//     { 'user': 'fred',    'age': 40, 'active': false },
-//     { 'user': 'pebbles', 'age': 1,  'active': true }
-// ];
-// var tmp=_.find(users, { 'age': 1, 'active': true });
-// console.log(tmp);
-
-// testPort.deleteAllSMS();
-// testPort.readMessage();
-
-// let pduData=convertPDU.stringToPDU("Tin nhắn chứa ký tự","+84938256706","+84980200030",16)
-// console.log(pduData);
-// let convertPdutoText=convertPDU.getPDUMetaInfo(pduData.pduData);
-// console.log(convertPdutoText);
-testPort.on("listenCallBackReadSms",(data)=>{
-    console.log("Read SMS: "+data.data.smsContent)
-    if(data.indexSms){
-        testPort.deleteSMSIndex(data.indexSms);
-    }
-})
-
-
-

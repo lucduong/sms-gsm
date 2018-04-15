@@ -15,6 +15,8 @@ export enum Command {
 }
 const Readline = SerialPort.parsers.Readline;
 const pdu  = require("sms-pdu-node")
+//const listTask=[]
+
 export class TestPort extends EventEmitter{
     private _serialPort: SerialPort;
     private _isOpen: Boolean;
@@ -38,6 +40,7 @@ export class TestPort extends EventEmitter{
     private _functionCallBackCheckGSM:string;
     private _functionCallBackReadSMS:string;
     private _functionCallBackCheckBalance:string;
+    private _functionCallBackGetOperation:string;
     private _regexGetBalanceVina=/[\d,]+\s/g;
     private _regexGetBalanceVietnamemobile=/[\d,.]+\s?[dD]/g;
     private _regexRemoveSpecialCharacter=/[^\w\s]/gi;
@@ -50,14 +53,18 @@ export class TestPort extends EventEmitter{
     private _smsRead:Message;
     private _indexReadSMS:Number;
     private _convertPdu:ConvertPDU;
+    private _listTak:Array<any>;
     constructor(port: String){
         super();
+        this._locked=false;
+        this._listTak=new Array();
         this._convertPdu=new ConvertPDU();
         this._isOpen=false;
         this._port=port;
         this._serialPort = this.createNewSerialPort(this._port);
         this._parser=this._serialPort.pipe(new Readline({ delimiter: '\r\n' }));
         this.bindEnven();
+        
     }
 
     createNewSerialPort(port: String): SerialPort {
@@ -75,13 +82,18 @@ export class TestPort extends EventEmitter{
             console.log("Open port sucessful");
         });
         this._parser.on('data',data => {
-            console.log(`Port ${this._port}: `+data);
+            console.log(data);
             if(data.indexOf("+CMTI:")!==-1){ //Có tin nhắn tới
                 let array = data.split(',');
                 let indexSMS=array[1];
                 if(indexSMS){
                     console.log(`Co tin nhăn moi Index SMS: ${indexSMS}`)
-                    this.readSMSByIndex(indexSMS);
+                    if(this._locked){
+                        //this._listTask.push(this.readSMSByIndex(indexSMS))
+                    }else{
+                        this.readSMSByIndex(indexSMS);
+                    }
+                    
                 }
             }
 
@@ -90,17 +102,26 @@ export class TestPort extends EventEmitter{
                     this._statusSendSMS = 1;
                 } else if (this._statusSendSMS === 1) {
                     this._statusSendSMS = 0;
-                    this._locked = false;
+                  
                     this._commandExec=Command.READ_SMS;
                     if (data.indexOf("OK")!==-1&&data.length===2) {
                         this.emit(this._functionCallBackSendSms,{phonenumber:this._phonenumberSend,status:true,port:this._port})
                     }else{
                         this.emit(this._functionCallBackSendSms,{phonenumber:this._phonenumberSend,status:false,port:this._port})
                     }
-                    this.readMessage();
+                    this._locked = false;
+                    
+                    
                 }
             }else if(this._commandExec===Command.CHECK){
-                this.emit(this._functionCallBackCheckGSM,{Data:data})
+                if(data.indexOf("+CPIN: READY")!==-1){
+                    this._locked = false;
+                    this.emit(this._functionCallBackCheckGSM,{port:this._port,Data:true})
+                }else if(data.indexOf("ERROR")!==-1){
+                    this._locked = false;
+                    this.emit(this._functionCallBackCheckGSM,{port:this._port,Data:false})
+                }
+                this.excuteTask()
             }else if(this._commandExec===Command.CHECK_BALANCE){
                 let balance="";
                 if(this._telco.indexOf("vinaphone")!==-1||this._telco.indexOf("mobilephone")!==-1){
@@ -109,6 +130,7 @@ export class TestPort extends EventEmitter{
                         balance=data.match(this._regexGetBalanceVina)[0];
                         balance=balance.replace(this._regexRemoveSpecialCharacter,'');//remove special chracter
                         console.log("So tien trong TK: "+balance);
+                        
                         this.readMessage();
                     }
                 }else if(this._telco.indexOf("vietnamobile")!==-1){
@@ -120,10 +142,24 @@ export class TestPort extends EventEmitter{
                         this.readMessage();
                     }
                 }
+                this._locked = false;
                 this.emit(this._functionCallBackCheckBalance,{balance:balance,port:this._port})
+                this.excuteTask()
                 
             }else if(this._commandExec===Command.GET_OPERATOR){
-                console.log("Thông tin nhà mạng: "+data);
+                //console.log("Thông tin nhà mạng: "+data);
+                
+                if(data.toLowerCase().indexOf("viettel")!==-1){
+                    this.emit(this._functionCallBackGetOperation,{port:this._port,data:"viettel"});
+                }else if(data.toLowerCase().indexOf("vinaphone")!==-1){
+                    this.emit(this._functionCallBackGetOperation,{port:this._port,data:"vinaphone"});
+                }else if(data.toLowerCase().indexOf("mobilephone")!==-1){
+                    this.emit(this._functionCallBackGetOperation,{port:this._port,data:"mobilephone"});
+                }else if(data.indexOf("OK")!==-1&&data.length===2){
+                    this._locked = false;
+                    this.excuteTask()
+                }
+                
             }else if(this._commandExec===Command.READ_SMS){
                 if(data.indexOf('+CMGL:')!==-1){
                     let arrayData=data.split(',');
@@ -142,7 +178,9 @@ export class TestPort extends EventEmitter{
                 }
                 else if(data.indexOf("OK")!==-1 && data.length===2){
                     this._readingSMS=false;
+                    this._locked=false;
                     this.emit(this._functionCallBackReadSMS,{data:this._smsRead,port:this._port,indexSms:this._indexReadSMS})
+                    this.excuteTask()
                 }
                 else if(this._readingSMS){
                     console.log("==================Body========================");
@@ -158,7 +196,8 @@ export class TestPort extends EventEmitter{
                 this.readMessage();
             }else if(this._commandExec===Command.DELETE_SMS_INDEX){
                 if(data.indexOf("OK")!==-1){
-                    this.readMessage();
+                    this._locked = false;
+                    
                 }
             }
         });
@@ -177,6 +216,7 @@ export class TestPort extends EventEmitter{
         });
     }
     checkGsm():void{
+        this._locked=true
         this._commandExec=Command.CHECK;
         this._serialPort.write(this.AT_CHECK);
         this._serialPort.write('\r');
@@ -220,6 +260,7 @@ export class TestPort extends EventEmitter{
         this._serialPort.write('^z');
     }
     checkModeGSM():void{
+        this._locked=true;
         this._serialPort.write('AT+CMGF?');
         this._serialPort.write('\r');
     }
@@ -231,6 +272,7 @@ export class TestPort extends EventEmitter{
     }
 
     readSMSByIndex(index:number):void{
+        this._locked=true;
         this._commandExec=Command.READ_SMS_INDEX;
         this._serialPort.write(`AT+CMGF=0 ;+CMGR=${index}`);
         //this._serialPort.write(`AT+CMGR=${index}`);
@@ -239,12 +281,15 @@ export class TestPort extends EventEmitter{
     }
 
     getOperatorNetwork():void{
+        this._locked=true;
         this._commandExec=Command.GET_OPERATOR;
         this._serialPort.write(this.AT_GET_OPERATOR);
         this._serialPort.write('\r');
+        
     }
 
     getPhoneNumber():void{
+        this._locked=true;
         this._commandExec=Command.GET_PHONE_NUMBER;
         this._serialPort.write(this.AT_GET_PHONE_NUMBER);
         this._serialPort.write('\r');
@@ -257,12 +302,14 @@ export class TestPort extends EventEmitter{
     }
 
     checkBalance():void{
+        this._locked=true;
         this._commandExec=Command.CHECK_BALANCE;
         this._serialPort.write("AT+CUSD=1,\"*101#\"");
         this._serialPort.write('\r');
     }
 
     deleteSMSIndex(index:Number):void{
+        this._locked=true;
         this._commandExec=Command.DELETE_SMS_INDEX;
         this._serialPort.write(this.AT_DELETE_SMS_INDEX+index);
         this._serialPort.write('\r');
@@ -273,6 +320,23 @@ export class TestPort extends EventEmitter{
         this._serialPort.write('\r');
     }
 
+    addTask(val:any):void{
+        this._listTak.push(val);
+    }
+    
+    private excuteTask():void{
+        // if(listTask.length>0){
+        //     listTask[0];
+        //     listTask.splice(0,1)        
+        // }
+        //
+        console.log( this._listTak.length)
+        if ( this._listTak.length > 0) {
+            const [task] =  this._listTak;
+            const { action, params } = task;
+            if (action) action(params);
+        }
+    }
    
 
     get functionCallBackSendSms(): string {
@@ -285,7 +349,7 @@ export class TestPort extends EventEmitter{
 
     get functionCallBackCheckGSM(): string {
         return this._functionCallBackCheckGSM;
-      }
+    }
     
     set functionCallBackCheckGSM(val: string) {
         this._functionCallBackCheckGSM = val;
@@ -307,6 +371,14 @@ export class TestPort extends EventEmitter{
         this._functionCallBackCheckBalance = val;
     }
 
+    get functionCallBackGetOperation(): string {
+        return this._functionCallBackGetOperation;
+      }
+    
+    set functionCallBackGetOperation(val: string) {
+        this._functionCallBackGetOperation = val;
+    }
+
     get isOpen(): Boolean {
         return this._isOpen;
       }
@@ -315,6 +387,13 @@ export class TestPort extends EventEmitter{
         this._isOpen = val;
     }
 
+    get isLock(): Boolean {
+        return this._locked;
+    }
+    set isLock(val:Boolean) {
+        this._locked = val;
+    }
+    
     get telco(): String {
         return this._telco;
     }

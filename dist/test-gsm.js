@@ -6,14 +6,40 @@ var Message_1 = require("./Message");
 var message = new Message_1.Message("Test gởi tin nhắn chúa ký tự", "+84938256706");
 var _ = require('lodash');
 var SerialPort = require('serialport');
-var testPort = new TestPort_1.TestPort("COM12");
+var testPort = new TestPort_1.TestPort("/dev/ttyUSB15");
+var testPort1 = new TestPort_1.TestPort("/dev/ttyUSB14");
 var convertPDU = new convertPdu_1.ConvertPDU();
 var i = 0;
 var listPort = [];
 testPort.functionCallBackReadSMS = "listenCallBackReadSms";
 testPort.telco = "viettel";
+testPort.functionCallBackCheckGSM = "listenCallBackCheckGSM";
+testPort.functionCallBackGetOperation = "listenCallBackGetOperation";
+testPort1.functionCallBackCheckGSM = "listenCallBackCheckGSM";
+testPort1.functionCallBackGetOperation = "listenCallBackGetOperation";
+testPort.on("listenCallBackCheckGSM", function (Data) {
+    console.log(Data);
+});
+testPort.on("listenCallBackGetOperation", function (Data) {
+    console.log(Data);
+});
+testPort1.on("listenCallBackCheckGSM", function (Data) {
+    console.log(Data);
+});
+testPort1.on("listenCallBackGetOperation", function (Data) {
+    console.log(Data);
+});
 testPort.open().then(function () {
-    testPort.readMessage();
+    testPort.checkGsm();
+    if (testPort.isLock) {
+        testPort.addTask({ action: testPort.getOperatorNetwork, params: {} });
+    }
+    else {
+    }
+});
+testPort1.open().then(function () {
+    testPort1.checkGsm();
+    testPort1.addTask({ action: testPort1.getOperatorNetwork, params: {} });
 });
 testPort.on("listenCallBackReadSms", function (data) {
     console.log("Read SMS: " + data.data.smsContent);

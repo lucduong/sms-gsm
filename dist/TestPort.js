@@ -48,6 +48,9 @@ var TestPort = (function (_super) {
         _this.AT_CHANGE_MOD_RECEIVE_SMS = "AT+CNMI=2,2,0,0,0";
         _this._regexGetBalanceVina = /[\d,]+\s/g;
         _this._regexGetBalanceVietnamemobile = /[\d,.]+\s?[dD]/g;
+        _this._regexRemoveSpecialCharacter = /[^\w\s]/gi;
+        _this._locked = false;
+        _this._listTak = new Array();
         _this._convertPdu = new convertPdu_1.ConvertPDU();
         _this._isOpen = false;
         _this._port = port;
@@ -72,13 +75,17 @@ var TestPort = (function (_super) {
             console.log("Open port sucessful");
         });
         this._parser.on('data', function (data) {
-            console.log("Port " + _this._port + ": " + data);
+            console.log(data);
             if (data.indexOf("+CMTI:") !== -1) {
                 var array = data.split(',');
                 var indexSMS = array[1];
                 if (indexSMS) {
                     console.log("Co tin nh\u0103n moi Index SMS: " + indexSMS);
-                    _this.readSMSByIndex(indexSMS);
+                    if (_this._locked) {
+                    }
+                    else {
+                        _this.readSMSByIndex(indexSMS);
+                    }
                 }
             }
             if (_this._commandExec === Command.SEND_SMS) {
@@ -87,7 +94,6 @@ var TestPort = (function (_super) {
                 }
                 else if (_this._statusSendSMS === 1) {
                     _this._statusSendSMS = 0;
-                    _this._locked = false;
                     _this._commandExec = Command.READ_SMS;
                     if (data.indexOf("OK") !== -1 && data.length === 2) {
                         _this.emit(_this._functionCallBackSendSms, { phonenumber: _this._phonenumberSend, status: true, port: _this._port });
@@ -95,18 +101,27 @@ var TestPort = (function (_super) {
                     else {
                         _this.emit(_this._functionCallBackSendSms, { phonenumber: _this._phonenumberSend, status: false, port: _this._port });
                     }
-                    _this.readMessage();
+                    _this._locked = false;
                 }
             }
             else if (_this._commandExec === Command.CHECK) {
-                _this.emit(_this._functionCallBackCheckGSM, { Data: data });
+                if (data.indexOf("+CPIN: READY") !== -1) {
+                    _this._locked = false;
+                    _this.emit(_this._functionCallBackCheckGSM, { port: _this._port, Data: true });
+                }
+                else if (data.indexOf("ERROR") !== -1) {
+                    _this._locked = false;
+                    _this.emit(_this._functionCallBackCheckGSM, { port: _this._port, Data: false });
+                }
+                _this.excuteTask();
             }
             else if (_this._commandExec === Command.CHECK_BALANCE) {
                 var balance = "";
-                if (_this._telco.indexOf("vinaphone") !== -1) {
+                if (_this._telco.indexOf("vinaphone") !== -1 || _this._telco.indexOf("mobilephone") !== -1) {
                     if (_this._regexGetBalanceVina.test(data)) {
                         console.log("Kiem tra TK: " + data);
                         balance = data.match(_this._regexGetBalanceVina)[0];
+                        balance = balance.replace(_this._regexRemoveSpecialCharacter, '');
                         console.log("So tien trong TK: " + balance);
                         _this.readMessage();
                     }
@@ -115,14 +130,29 @@ var TestPort = (function (_super) {
                     if (_this._regexGetBalanceVietnamemobile.test(data)) {
                         console.log("Kiem tra TK: " + data);
                         balance = data.match(_this._regexGetBalanceVietnamemobile)[0];
+                        balance = balance.replace(_this._regexRemoveSpecialCharacter, '');
                         console.log("So tien trong TK: " + balance);
                         _this.readMessage();
                     }
                 }
+                _this._locked = false;
                 _this.emit(_this._functionCallBackCheckBalance, { balance: balance, port: _this._port });
+                _this.excuteTask();
             }
             else if (_this._commandExec === Command.GET_OPERATOR) {
-                console.log("Thông tin nhà mạng: " + data);
+                if (data.toLowerCase().indexOf("viettel") !== -1) {
+                    _this.emit(_this._functionCallBackGetOperation, { port: _this._port, data: "viettel" });
+                }
+                else if (data.toLowerCase().indexOf("vinaphone") !== -1) {
+                    _this.emit(_this._functionCallBackGetOperation, { port: _this._port, data: "vinaphone" });
+                }
+                else if (data.toLowerCase().indexOf("mobilephone") !== -1) {
+                    _this.emit(_this._functionCallBackGetOperation, { port: _this._port, data: "mobilephone" });
+                }
+                else if (data.indexOf("OK") !== -1 && data.length === 2) {
+                    _this._locked = false;
+                    _this.excuteTask();
+                }
             }
             else if (_this._commandExec === Command.READ_SMS) {
                 if (data.indexOf('+CMGL:') !== -1) {
@@ -141,7 +171,9 @@ var TestPort = (function (_super) {
                 }
                 else if (data.indexOf("OK") !== -1 && data.length === 2) {
                     _this._readingSMS = false;
+                    _this._locked = false;
                     _this.emit(_this._functionCallBackReadSMS, { data: _this._smsRead, port: _this._port, indexSms: _this._indexReadSMS });
+                    _this.excuteTask();
                 }
                 else if (_this._readingSMS) {
                     console.log("==================Body========================");
@@ -156,7 +188,7 @@ var TestPort = (function (_super) {
             }
             else if (_this._commandExec === Command.DELETE_SMS_INDEX) {
                 if (data.indexOf("OK") !== -1) {
-                    _this.readMessage();
+                    _this._locked = false;
                 }
             }
         });
@@ -176,6 +208,7 @@ var TestPort = (function (_super) {
         });
     };
     TestPort.prototype.checkGsm = function () {
+        this._locked = true;
         this._commandExec = Command.CHECK;
         this._serialPort.write(this.AT_CHECK);
         this._serialPort.write('\r');
@@ -207,6 +240,7 @@ var TestPort = (function (_super) {
         this._serialPort.write('^z');
     };
     TestPort.prototype.checkModeGSM = function () {
+        this._locked = true;
         this._serialPort.write('AT+CMGF?');
         this._serialPort.write('\r');
     };
@@ -216,17 +250,20 @@ var TestPort = (function (_super) {
         this._serialPort.write('\r');
     };
     TestPort.prototype.readSMSByIndex = function (index) {
+        this._locked = true;
         this._commandExec = Command.READ_SMS_INDEX;
         this._serialPort.write("AT+CMGF=0 ;+CMGR=" + index);
         this._serialPort.write('\r');
         this._indexReadSMS = index;
     };
     TestPort.prototype.getOperatorNetwork = function () {
+        this._locked = true;
         this._commandExec = Command.GET_OPERATOR;
         this._serialPort.write(this.AT_GET_OPERATOR);
         this._serialPort.write('\r');
     };
     TestPort.prototype.getPhoneNumber = function () {
+        this._locked = true;
         this._commandExec = Command.GET_PHONE_NUMBER;
         this._serialPort.write(this.AT_GET_PHONE_NUMBER);
         this._serialPort.write('\r');
@@ -237,11 +274,13 @@ var TestPort = (function (_super) {
         this._serialPort.write('\r');
     };
     TestPort.prototype.checkBalance = function () {
+        this._locked = true;
         this._commandExec = Command.CHECK_BALANCE;
         this._serialPort.write("AT+CUSD=1,\"*101#\"");
         this._serialPort.write('\r');
     };
     TestPort.prototype.deleteSMSIndex = function (index) {
+        this._locked = true;
         this._commandExec = Command.DELETE_SMS_INDEX;
         this._serialPort.write(this.AT_DELETE_SMS_INDEX + index);
         this._serialPort.write('\r');
@@ -249,6 +288,18 @@ var TestPort = (function (_super) {
     TestPort.prototype.resetGsm = function () {
         this._serialPort.write("AT+CFUN=1");
         this._serialPort.write('\r');
+    };
+    TestPort.prototype.addTask = function (val) {
+        this._listTak.push(val);
+    };
+    TestPort.prototype.excuteTask = function () {
+        console.log(this._listTak.length);
+        if (this._listTak.length > 0) {
+            var task = this._listTak[0];
+            var action = task.action, params = task.params;
+            if (action)
+                action(params);
+        }
     };
     Object.defineProperty(TestPort.prototype, "functionCallBackSendSms", {
         get: function () {
@@ -290,12 +341,32 @@ var TestPort = (function (_super) {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(TestPort.prototype, "functionCallBackGetOperation", {
+        get: function () {
+            return this._functionCallBackGetOperation;
+        },
+        set: function (val) {
+            this._functionCallBackGetOperation = val;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(TestPort.prototype, "isOpen", {
         get: function () {
             return this._isOpen;
         },
         set: function (val) {
             this._isOpen = val;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(TestPort.prototype, "isLock", {
+        get: function () {
+            return this._locked;
+        },
+        set: function (val) {
+            this._locked = val;
         },
         enumerable: true,
         configurable: true
