@@ -29,17 +29,8 @@ testPort1.on("listenCallBackCheckGSM", function (Data) {
 testPort1.on("listenCallBackGetOperation", function (Data) {
     console.log(Data);
 });
-testPort.open().then(function () {
-    testPort.checkGsm();
-    if (testPort.isLock) {
-        testPort.addTask({ action: testPort.getOperatorNetwork, params: {} });
-    }
-    else {
-    }
-});
 testPort1.open().then(function () {
-    testPort1.checkGsm();
-    testPort1.addTask({ action: testPort1.getOperatorNetwork, params: {} });
+    testPort1.getOperatorNetwork();
 });
 testPort.on("listenCallBackReadSms", function (data) {
     console.log("Read SMS: " + data.data.smsContent);

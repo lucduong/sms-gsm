@@ -116,10 +116,10 @@ export class TestPort extends EventEmitter{
             }else if(this._commandExec===Command.CHECK){
                 if(data.indexOf("+CPIN: READY")!==-1){
                     this._locked = false;
-                    this.emit(this._functionCallBackCheckGSM,{port:this._port,Data:true})
+                    this.emit(this._functionCallBackCheckGSM,{port:this._port,status:true})
                 }else if(data.indexOf("ERROR")!==-1){
                     this._locked = false;
-                    this.emit(this._functionCallBackCheckGSM,{port:this._port,Data:false})
+                    this.emit(this._functionCallBackCheckGSM,{port:this._port,status:false})
                 }
                 this.excuteTask()
             }else if(this._commandExec===Command.CHECK_BALANCE){
@@ -158,6 +158,10 @@ export class TestPort extends EventEmitter{
                 }else if(data.indexOf("OK")!==-1&&data.length===2){
                     this._locked = false;
                     this.excuteTask()
+                }else{
+                    this.emit(this._functionCallBackGetOperation, { port: this._port, data: "ERROR" });
+                    this._locked = false;
+                    this.excuteTask();
                 }
                 
             }else if(this._commandExec===Command.READ_SMS){

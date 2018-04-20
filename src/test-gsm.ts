@@ -30,20 +30,21 @@ testPort1.on("listenCallBackGetOperation",(Data)=>{
     console.log(Data)
 })
 
-testPort.open().then(()=>{
-    testPort.checkGsm();
+testPort1.open().then(()=>{
+    // testPort.checkGsm();
    
-    if(testPort.isLock){
-       testPort.addTask({ action: testPort.getOperatorNetwork, params: { } });
-    }else{
-        //testPort.getOperatorNetwork();
-    }
+    // if(testPort.isLock){
+    //    testPort.addTask({ action: testPort.getOperatorNetwork, params: { } });
+    // }else{
+    //     //testPort.getOperatorNetwork();
+    // }
+    testPort1.getOperatorNetwork();
 })
 
-testPort1.open().then(()=>{
-    testPort1.checkGsm();
-    testPort1.addTask({action:testPort1.getOperatorNetwork,params:{}})
-})
+// testPort1.open().then(()=>{
+//     // testPort1.checkGsm();
+//     // testPort1.addTask({action:testPort1.getOperatorNetwork,params:{}})
+// })
 
 
 

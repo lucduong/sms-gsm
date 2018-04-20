@@ -107,11 +107,11 @@ var TestPort = (function (_super) {
             else if (_this._commandExec === Command.CHECK) {
                 if (data.indexOf("+CPIN: READY") !== -1) {
                     _this._locked = false;
-                    _this.emit(_this._functionCallBackCheckGSM, { port: _this._port, Data: true });
+                    _this.emit(_this._functionCallBackCheckGSM, { port: _this._port, status: true });
                 }
                 else if (data.indexOf("ERROR") !== -1) {
                     _this._locked = false;
-                    _this.emit(_this._functionCallBackCheckGSM, { port: _this._port, Data: false });
+                    _this.emit(_this._functionCallBackCheckGSM, { port: _this._port, status: false });
                 }
                 _this.excuteTask();
             }
@@ -150,6 +150,11 @@ var TestPort = (function (_super) {
                     _this.emit(_this._functionCallBackGetOperation, { port: _this._port, data: "mobilephone" });
                 }
                 else if (data.indexOf("OK") !== -1 && data.length === 2) {
+                    _this._locked = false;
+                    _this.excuteTask();
+                }
+                else {
+                    _this.emit(_this._functionCallBackGetOperation, { port: _this._port, data: "ERROR" });
                     _this._locked = false;
                     _this.excuteTask();
                 }
