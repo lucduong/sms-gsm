@@ -23,6 +23,6 @@ testPort1.on("callbackGetSimnumber", function (data) {
     console.log(data);
 });
 testPort1.open().then(function () {
-    testPort1.getSimnumber();
+    testPort1.sendSms(message);
 });
 //# sourceMappingURL=test-gsm.js.map

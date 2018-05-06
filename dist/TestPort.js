@@ -147,7 +147,7 @@ var TestPort = (function (_super) {
                         if (arrayData[2] === '45201') {
                             _this.emit(_this._functionCallBackGetOperation, { port: _this._port, data: "mobilephone" });
                         }
-                        else if (arrayData[2] === '45207') {
+                        else if (arrayData[2] === '45207' || arrayData[2] === '45204') {
                             _this.emit(_this._functionCallBackGetOperation, { port: _this._port, data: "viettel" });
                         }
                         else if (arrayData[2] === '45205') {

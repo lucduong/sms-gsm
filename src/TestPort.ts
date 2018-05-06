@@ -12,7 +12,10 @@ export enum Command {
     GET_OPERATOR=7,
     GET_PHONE_NUMBER=8,
     DELETE_SMS_INDEX=9,
+    GET_SIM_NUMBER=10,
 }
+
+
 const Readline = SerialPort.parsers.Readline;
 const pdu  = require("sms-pdu-node")
 //const listTask=[]
@@ -33,7 +36,7 @@ export class TestPort extends EventEmitter{
     private AT_READ_UNREAD="AT+CMGL=1";
     private AT_DELETE_ALLSMS="AT+CMGD=1,4";
     private AT_DELETE_SMS_INDEX="AT+CMGD=";
-    private AT_GET_OPERATOR="AT+COPS=?";
+    private AT_GET_OPERATOR="AT+COPS?";
     private AT_GET_PHONE_NUMBER="AT+CNUM";
     private AT_CHANGE_MOD_RECEIVE_SMS="AT+CNMI=2,2,0,0,0";
     private _functionCallBackSendSms:string;
@@ -41,6 +44,7 @@ export class TestPort extends EventEmitter{
     private _functionCallBackReadSMS:string;
     private _functionCallBackCheckBalance:string;
     private _functionCallBackGetOperation:string;
+    private _functionCallBackGetSimNumber:string;
     private _regexGetBalanceVina=/[\d,]+\s/g;
     private _regexGetBalanceVietnamemobile=/[\d,.]+\s?[dD]/g;
     private _regexRemoveSpecialCharacter=/[^\w\s]/gi;
@@ -147,23 +151,27 @@ export class TestPort extends EventEmitter{
                 this.excuteTask()
                 
             }else if(this._commandExec===Command.GET_OPERATOR){
-                //console.log("Thông tin nhà mạng: "+data);
-                
-                if(data.toLowerCase().indexOf("viettel")!==-1){
-                    this.emit(this._functionCallBackGetOperation,{port:this._port,data:"viettel"});
-                }else if(data.toLowerCase().indexOf("vinaphone")!==-1){
-                    this.emit(this._functionCallBackGetOperation,{port:this._port,data:"vinaphone"});
-                }else if(data.toLowerCase().indexOf("mobilephone")!==-1){
-                    this.emit(this._functionCallBackGetOperation,{port:this._port,data:"mobilephone"});
+                if(data.indexOf('+COPS: ')!==-1){
+                    let arrayData=data.split(',');
+                    if(arrayData.length>=3){
+                        if(arrayData[2]==='45201'){
+                            this.emit(this._functionCallBackGetOperation,{port:this._port,data:"mobilephone"});
+                        }else if(arrayData[2]==='45207'||arrayData[2]==='45204'){
+                            this.emit(this._functionCallBackGetOperation,{port:this._port,data:"viettel"});
+                        }
+                        else if(arrayData[2]==='45205'){
+                            this.emit(this._functionCallBackGetOperation,{port:this._port,data:"vietnamobile"});
+                        }else{
+                            this.emit(this._functionCallBackGetOperation,{port:this._port,data:"vinaphone"});
+                        }
+                    }else{
+                        this._locked = false;
+                        this.excuteTask()
+                    }
                 }else if(data.indexOf("OK")!==-1&&data.length===2){
                     this._locked = false;
                     this.excuteTask()
-                }else{
-                    this.emit(this._functionCallBackGetOperation, { port: this._port, data: "ERROR" });
-                    this._locked = false;
-                    this.excuteTask();
-                }
-                
+                }                
             }else if(this._commandExec===Command.READ_SMS){
                 if(data.indexOf('+CMGL:')!==-1){
                     let arrayData=data.split(',');
@@ -201,9 +209,24 @@ export class TestPort extends EventEmitter{
             }else if(this._commandExec===Command.DELETE_SMS_INDEX){
                 if(data.indexOf("OK")!==-1){
                     this._locked = false;
-                    
+                    this.excuteTask();
                 }
-            }
+            }else if(this._commandExec===Command.GET_SIM_NUMBER){
+                    if(this._telco==="viettel"){
+                        const regexPatten= /(84|0)\d{9,11}/g;   
+                        if(regexPatten.test(data)){
+                            let dataArray=data.match(regexPatten)
+                            this.emit(this._functionCallBackGetSimNumber,{port:this._port,simNumber:dataArray[0]})    
+                        }
+                    }
+                    else if(data.indexOf("+CUSD:")!==-1){
+                        let dataArray=data.split(',')
+                        this.emit(this._functionCallBackGetSimNumber,{port:this._port,simNumber:dataArray[1]})
+                    }else{
+                        this._locked = false;
+                        this.excuteTask();
+                    }
+                }
         });
     }
     
@@ -232,13 +255,13 @@ export class TestPort extends EventEmitter{
         this._locked=true;
         this._phonenumberSend=message.phoneNumber;
         let dataPDU;
-        if(this._telco.toLowerCase()=="vinaphone"){
+        if(this._telco.toLowerCase()==="vinaphone"){
             dataPDU=this._convertPdu.stringToPDU(message.smsContent,this._phonenumberSend,this.SMSC_VINA,16);
         }
-        else if(this._telco.toLowerCase()=="viettel"){
+        else if(this._telco.toLowerCase()==="viettel"){
             dataPDU=this._convertPdu.stringToPDU(message.smsContent,this._phonenumberSend,this.SMSC_VIETTEL,16);
         }
-        else if(this._telco.toLowerCase()=="mobilephone"){
+        else if(this._telco.toLowerCase()==="mobilephone"){
             dataPDU=this._convertPdu.stringToPDU(message.smsContent,this._phonenumberSend,this.SMSC_MOBILE,16);
         }else{
             dataPDU=this._convertPdu.stringToPDU(message.smsContent,this._phonenumberSend,this.SMSC_VIETNAMOBILE,16);
@@ -287,17 +310,21 @@ export class TestPort extends EventEmitter{
     getOperatorNetwork():void{
         this._locked=true;
         this._commandExec=Command.GET_OPERATOR;
+        this._serialPort.write("AT+COPS=3,2");
+        this._serialPort.write('\r');
         this._serialPort.write(this.AT_GET_OPERATOR);
         this._serialPort.write('\r');
+        // this._serialPort.write("AT+WOPN=0,45205");
+        // this._serialPort.write('\r');
         
     }
 
-    getPhoneNumber():void{
-        this._locked=true;
-        this._commandExec=Command.GET_PHONE_NUMBER;
-        this._serialPort.write(this.AT_GET_PHONE_NUMBER);
-        this._serialPort.write('\r');
-    }
+    // getPhoneNumber():void{
+    //     this._locked=true;
+    //     this._commandExec=Command.GET_PHONE_NUMBER;
+    //     this._serialPort.write(this.AT_GET_PHONE_NUMBER);
+    //     this._serialPort.write('\r');
+    // }
 
     deleteAllSMS():void{
         this._commandExec=Command.DELETE_ALL_SMS;
@@ -312,17 +339,49 @@ export class TestPort extends EventEmitter{
         this._serialPort.write('\r');
     }
 
+    getSimnumber():void{
+        this._locked=true;
+        this._commandExec=Command.GET_SIM_NUMBER;
+        if(this._telco==="mobilephone"){
+            this._serialPort.write("AT+CUSD=1,\"*0#\"");
+        }
+        else if(this._telco==="vinaphone"){
+            this._serialPort.write("AT+CUSD=1,\"*110#\"");
+        }
+        else if(this._telco==="viettel"){
+            this._serialPort.write("AT+CUSD=1,\"*777#\"");
+        }
+        else if(this._telco==="vietnamobile"){
+            this._serialPort.write("AT+CUSD=1,\"*123#\"");
+        }
+        this._serialPort.write('\r');
+    }
+
     deleteSMSIndex(index:Number):void{
         this._locked=true;
         this._commandExec=Command.DELETE_SMS_INDEX;
         this._serialPort.write(this.AT_DELETE_SMS_INDEX+index);
         this._serialPort.write('\r');
     }
+    
 
-    resetGsm():void{
-        this._serialPort.write("AT+CFUN=1");
-        this._serialPort.write('\r');
+    closePort(): Promise<Boolean> {
+        return new Promise((resolve, reject) => {
+          this._serialPort.close(err => {
+            if (err){
+                return reject(err);
+            }else{
+                this._isOpen = false;
+                return resolve(this._isOpen);
+            } 
+          });
+        });
     }
+
+    // resetGsm():void{
+    //     this._serialPort.write("AT+CFUN=1");
+    //     this._serialPort.write('\r');
+    // }
 
     addTask(val:any):void{
         this._listTak.push(val);
@@ -334,7 +393,7 @@ export class TestPort extends EventEmitter{
         //     listTask.splice(0,1)        
         // }
         //
-        console.log( this._listTak.length)
+        //console.log( this._listTak.length)
         if ( this._listTak.length > 0) {
             const [task] =  this._listTak;
             const { action, params } = task;
@@ -382,6 +441,16 @@ export class TestPort extends EventEmitter{
     set functionCallBackGetOperation(val: string) {
         this._functionCallBackGetOperation = val;
     }
+
+    get functionCallBackGetSimNumber(): string {
+        return this._functionCallBackGetSimNumber;
+      }
+    
+    set functionCallBackGetSimNumber(val: string) {
+        this._functionCallBackGetSimNumber = val;
+    }
+
+    
 
     get isOpen(): Boolean {
         return this._isOpen;

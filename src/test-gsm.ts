@@ -4,41 +4,44 @@ import {Message} from './Message';
 const message=new Message("Test gởi tin nhắn chúa ký tự","+84938256706");
 const _ = require('lodash');
 const SerialPort = require('serialport');
-const testPort=new TestPort("/dev/ttyUSB15");
-const testPort1=new TestPort("/dev/ttyUSB14");
+//const testPort=new TestPort("/dev/ttyUSB15");
+const testPort1=new TestPort("/dev/ttyUSB9");
 const convertPDU=new ConvertPDU();
 let i=0;
 const listPort=[];
 
-testPort.functionCallBackReadSMS="listenCallBackReadSms";
-testPort.telco="viettel";
-testPort.functionCallBackCheckGSM="listenCallBackCheckGSM"
-testPort.functionCallBackGetOperation="listenCallBackGetOperation";
 testPort1.functionCallBackCheckGSM="listenCallBackCheckGSM"
 testPort1.functionCallBackGetOperation="listenCallBackGetOperation";
-testPort.on("listenCallBackCheckGSM",(Data)=>{
-    console.log(Data)
-})
-testPort.on("listenCallBackGetOperation",(Data)=>{
-    console.log(Data)
-})
+testPort1.functionCallBackGetSimNumber="callbackGetSimnumber";
+testPort1.telco="mobilephone"
+
 
 testPort1.on("listenCallBackCheckGSM",(Data)=>{
     console.log(Data)
 })
 testPort1.on("listenCallBackGetOperation",(Data)=>{
-    console.log(Data)
+    //console.log(Data)
+})
+
+testPort1.on("callbackGetSimnumber",(data)=>{
+    console.log(data)
 })
 
 testPort1.open().then(()=>{
-    // testPort.checkGsm();
+    //testPort1.checkGsm();
    
     // if(testPort.isLock){
     //    testPort.addTask({ action: testPort.getOperatorNetwork, params: { } });
     // }else{
     //     //testPort.getOperatorNetwork();
     // }
-    testPort1.getOperatorNetwork();
+    //testPort1.getOperatorNetwork();
+
+    testPort1.sendSms(message);
+    //testPort1.getSimnumber();
+    //testPort1.getPhoneNumber();
+    //testPort1.checkBalance();
+    // testPort1.readMessage();
 })
 
 // testPort1.open().then(()=>{
@@ -53,13 +56,6 @@ testPort1.open().then(()=>{
 // console.log(pduData);
 // let convertPdutoText=convertPDU.getPDUMetaInfo(pduData.pduData);
 // console.log(convertPdutoText);
-testPort.on("listenCallBackReadSms",(data)=>{
-    console.log("Read SMS: "+data.data.smsContent)
-    if(data.indexSms){
-        testPort.deleteSMSIndex(data.indexSms);
-    }
-})
-
 
 // testPort.on("listenCallBackCheckGsm",(data)=>{
 //     console.log("Check Gsm:"+data.Data)
